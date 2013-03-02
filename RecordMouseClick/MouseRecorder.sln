@@ -1,0 +1,29 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MouseHook", "MouseHook\MouseHook.vcproj", "{627098B3-A97D-492A-9DB6-84C3CE6FAC7F}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Recorder", "Recorder\Recorder.vcproj", "{2DE83936-076F-44B4-BA7E-D897B6420BE8}"
+	ProjectSection(ProjectDependencies) = postProject
+		{627098B3-A97D-492A-9DB6-84C3CE6FAC7F} = {627098B3-A97D-492A-9DB6-84C3CE6FAC7F}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{627098B3-A97D-492A-9DB6-84C3CE6FAC7F}.Debug|Win32.ActiveCfg = Debug|Win32
+		{627098B3-A97D-492A-9DB6-84C3CE6FAC7F}.Debug|Win32.Build.0 = Debug|Win32
+		{627098B3-A97D-492A-9DB6-84C3CE6FAC7F}.Release|Win32.ActiveCfg = Release|Win32
+		{627098B3-A97D-492A-9DB6-84C3CE6FAC7F}.Release|Win32.Build.0 = Release|Win32
+		{2DE83936-076F-44B4-BA7E-D897B6420BE8}.Debug|Win32.ActiveCfg = Debug|Win32
+		{2DE83936-076F-44B4-BA7E-D897B6420BE8}.Debug|Win32.Build.0 = Debug|Win32
+		{2DE83936-076F-44B4-BA7E-D897B6420BE8}.Release|Win32.ActiveCfg = Release|Win32
+		{2DE83936-076F-44B4-BA7E-D897B6420BE8}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
