@@ -1,6 +1,7 @@
 #pragma once
+#include <stdio.h>
 
-#define DEBUG_OUTPUT_CONSOLE 0
+#define DEBUG_OUTPUT_CONSOLE 1
 
 #if DEBUG_OUTPUT_CONSOLE
 #define OUTPUT(format, ...) printf(format, __VA_ARGS__)

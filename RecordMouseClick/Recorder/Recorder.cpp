@@ -5,9 +5,10 @@
 #include "Recorder.h"
 #include "mouseHook.h"
 #include <windows.h>
-#include <stdio.h>
 #include "debugOutput.h"
 #include <iostream>
+#include <fstream>
+#include <string>
 using namespace std;
 
 #define MAX_LOADSTRING 100
@@ -22,7 +23,6 @@ FILE* g_file = NULL;
 ATOM				MyRegisterClass(HINSTANCE hInstance);
 BOOL				InitInstance(HINSTANCE, int);
 LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
-INT_PTR CALLBACK	About(HWND, UINT, WPARAM, LPARAM);
 
 
 int APIENTRY _tWinMain(HINSTANCE hInstance,
@@ -51,7 +51,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	// 加载钩子
 	if (!loadHook())
 	{
-		MessageBox(NULL, L"Error!", L"加载DLL失败", 0);
+		MessageBox(NULL, L"加载DLL失败", L"Error!", MB_OK | MB_ICONERROR);
 		return FALSE;
 	}
 
@@ -148,8 +148,9 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
    hInst = hInstance; // 将实例句柄存储在全局变量中
 
-   hWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-      CW_USEDEFAULT, 0, 300, 100, NULL, NULL, hInstance, NULL);
+   hWnd = CreateWindow(szWindowClass, szTitle, WS_SYSMENU  
+,
+      CW_USEDEFAULT, 0, 113, 63, NULL, NULL, hInstance, NULL);
 
    if (!hWnd)
    {
@@ -176,9 +177,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	int wmId, wmEvent;
 
-	static int num = 0;
-	wchar_t title[40] = {0};
-
 	switch (message)
 	{
 	case WM_CREATE:
@@ -196,14 +194,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		// 分析菜单选择:
 		switch (wmId)
 		{
-		case IDM_ABOUT:
-			DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
-			break;
-		case IDM_EXIT:
-			DestroyWindow(hWnd);
-			break;
 		case IDB_START_STOP:
 			startStopButtonProc(hWnd);
+			break;
+		case IDB_GENERATE_IMAGE:
+			generateImage(hWnd);
 			break;
 		default:
 			return DefWindowProc(hWnd, message, wParam, lParam);
@@ -218,38 +213,29 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-// “关于”框的消息处理程序。
-INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
-{
-	UNREFERENCED_PARAMETER(lParam);
-	switch (message)
-	{
-	case WM_INITDIALOG:
-		return (INT_PTR)TRUE;
-
-	case WM_COMMAND:
-		if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
-		{
-			EndDialog(hDlg, LOWORD(wParam));
-			return (INT_PTR)TRUE;
-		}
-		break;
-	}
-	return (INT_PTR)FALSE;
-}
-
-
 void createButton(HWND hWnd, LPARAM lParam)
 {
 	CreateWindow(TEXT("BUTTON"),		//控件"类名称"
 			TEXT("开始"),
 			WS_CHILD | WS_VISIBLE |BS_PUSHBUTTON,
-			10,
-			10,
+			3,
+			3,
 			50,
 			30,
 			hWnd,
 			(HMENU)IDB_START_STOP,			//控件ID
+			((LPCREATESTRUCT) lParam)->hInstance,	//实例句柄
+			NULL);
+
+	CreateWindow(TEXT("BUTTON"),		//控件"类名称"
+			TEXT("生成"),
+			WS_CHILD | WS_VISIBLE |BS_PUSHBUTTON,
+			70,
+			3,
+			50,
+			30,
+			hWnd,
+			(HMENU)IDB_GENERATE_IMAGE,			//控件ID
 			((LPCREATESTRUCT) lParam)->hInstance,	//实例句柄
 			NULL);
 }
@@ -269,7 +255,7 @@ void startStopButtonProc(HWND hWnd)
 		OUTPUT("hook is installed\n");
 
 		// 打开文件用于记录鼠标数据
-		g_file = fopen("E://mouseInfo.log", "a");
+		g_file = fopen(LOG_FILE_PATH, "a");
 		if (NULL == g_file)
 		{
 			OUTPUT("file open fail\n");
@@ -293,10 +279,82 @@ void startStopButtonProc(HWND hWnd)
 	}
 }
 
+// 将坐标写入文件
 void recMousePos(POINT point)
 {
 	char data[15] = {0};
 	sprintf(data, "%d %d\n", point.x, point.y);
 	fwrite(data, strlen(data), 1, g_file);
 	fflush(g_file);
+}
+
+// 打开一个窗口，将所有的点描画在这个窗口上
+bool generateImage(HWND hWnd)
+{
+	if (NULL != g_file)
+	{
+		MessageBox(hWnd, L"请先停止记录", L"Error", MB_OK);
+		return false;
+	}
+
+	ifstream fileStream;
+	fileStream.open(LOG_FILE_PATH, ios::in);
+	if (!fileStream.is_open())
+	{
+		MessageBox(hWnd, L"文件打开失败", L"Error", MB_OK);
+		return false;		
+	}
+
+	string line;
+	size_t blankPos = 0;
+	POINT point = {0, 0};
+
+	registerImageClass(hInst);
+
+
+	// 窗口大小设置为720*40，应该将客户区域设置为此大小，但函数AdjustWindowRectEx()不好用。
+	HWND hWndDesktop = CreateWindow(L"ImageWindow", L"Image", WS_SYSMENU | WS_CAPTION , 0, 0, 720, 450, NULL, NULL, hInst, NULL);
+	OUTPUT("hWndDesktop = %d, error code = %d\n", hWndDesktop, GetLastError());
+	HDC hDc = GetWindowDC(hWndDesktop);
+	ShowWindow(hWndDesktop, SW_SHOW);
+	UpdateWindow(hWndDesktop);
+
+	while (getline(fileStream, line))
+	{
+		blankPos = line.find(" ");
+
+		// string转换为数值
+		point.x = atoi(line.substr(0, blankPos).c_str());
+		point.y = atoi(line.substr(blankPos + 1).c_str());
+		SetPixel(hDc, point.x >> 1, point.y >> 1, RGB(255, 0, 0));
+		OUTPUT("x = %d, y = %d\n", point.x, point.y);
+	}
+
+	OUTPUT("success!");
+	fileStream.close();
+	return true;
+}
+
+ATOM registerImageClass(HINSTANCE hInstance)
+{
+	WNDCLASSEX wcex;
+	wcex.cbSize			= sizeof(WNDCLASSEX);
+	wcex.style			= CS_HREDRAW | CS_VREDRAW;
+	wcex.lpfnWndProc	= imageWndProc;
+	wcex.cbClsExtra		= 0;
+	wcex.cbWndExtra		= 0;
+	wcex.hInstance		= hInst;
+	wcex.hIcon			= LoadIcon(hInst, MAKEINTRESOURCE(IDI_RECORDER));
+	wcex.hCursor		= LoadCursor(NULL, IDC_ARROW);
+	wcex.hbrBackground	= (HBRUSH)(COLOR_WINDOW+1);
+	wcex.lpszMenuName	= NULL;
+	wcex.lpszClassName	= L"ImageWindow";
+	wcex.hIconSm		= LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
+
+	return RegisterClassEx(&wcex);
+}
+
+LRESULT CALLBACK imageWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	return DefWindowProc(hWnd, message, wParam, lParam);
 }
