@@ -41,6 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				AdditionalIncludeDirectories="../DebugOutput/inc"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;MOUSEHOOK_EXPORTS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"

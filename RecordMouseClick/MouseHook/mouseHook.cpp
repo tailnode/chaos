@@ -1,8 +1,8 @@
-#include <objbase.h>
+ï»¿#include <objbase.h>
 #include <stdio.h>
 #include <tchar.h>
 #include "mouseHook.h"
-
+#include "debugOutput.h"
 
 HINSTANCE g_hIns = 0;
 HHOOK g_hook  = 0;
@@ -29,12 +29,12 @@ BOOL APIENTRY DllMain( HMODULE hModule,
 
 LRESULT CALLBACK MouseProc(int nCode, WPARAM wParam, LPARAM lParam)
 {	
-	// Êó±ê×ó/ÓÒ¼ü°´ÏÂ
+	// é¼ æ ‡å·¦/å³é”®æŒ‰ä¸‹
 	if (WM_LBUTTONDOWN == wParam ||WM_RBUTTONDOWN == wParam)
 	{
 		POINT point = ((PMSLLHOOKSTRUCT)lParam)->pt;
 
-		printf("MouseProc is involked!\tx = %d, y = %d\n", point.x, point.y);
+		OUTPUT("MouseProc is involked!\tx = %d, y = %d\n", point.x, point.y);
 		
 		SendMessage(g_hWnd, WM_USER_MOUSEPOSTION, 0, (LPARAM)&point);
 	}
