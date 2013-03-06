@@ -66,7 +66,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	return (int) msg.wParam;
 }
 
-
+// 加载DLL文件、定义钩子函数
 bool loadHook(void)
 {
 	HINSTANCE hIns = LoadLibrary(L"mouseHook.dll");
@@ -137,9 +137,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
    hInst = hInstance; // 将实例句柄存储在全局变量中
 
-   hWnd = CreateWindow(szWindowClass, szTitle, WS_SYSMENU  
-,
-      CW_USEDEFAULT, 0, 113, 63, NULL, NULL, hInstance, NULL);
+   hWnd = CreateWindow(szWindowClass, szTitle, WS_SYSMENU, CW_USEDEFAULT, 0, 113, 63, NULL, NULL, hInstance, NULL);
 
    if (!hWnd)
    {
@@ -202,9 +200,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
+// 建立BUTTON
 void createButton(HWND hWnd, LPARAM lParam)
 {
-	CreateWindow(TEXT("BUTTON"),		//控件"类名称"
+	// 开始BUTTON
+	CreateWindow(TEXT("BUTTON"),
 			TEXT("开始"),
 			WS_CHILD | WS_VISIBLE |BS_PUSHBUTTON,
 			3,
@@ -212,11 +212,12 @@ void createButton(HWND hWnd, LPARAM lParam)
 			50,
 			30,
 			hWnd,
-			(HMENU)IDB_START_STOP,			//控件ID
-			((LPCREATESTRUCT) lParam)->hInstance,	//实例句柄
+			(HMENU)IDB_START_STOP,
+			((LPCREATESTRUCT) lParam)->hInstance,
 			NULL);
 
-	CreateWindow(TEXT("BUTTON"),		//控件"类名称"
+	// 生成BUTTON
+	CreateWindow(TEXT("BUTTON"),
 			TEXT("生成"),
 			WS_CHILD | WS_VISIBLE |BS_PUSHBUTTON,
 			70,
@@ -224,11 +225,12 @@ void createButton(HWND hWnd, LPARAM lParam)
 			50,
 			30,
 			hWnd,
-			(HMENU)IDB_GENERATE_IMAGE,			//控件ID
-			((LPCREATESTRUCT) lParam)->hInstance,	//实例句柄
+			(HMENU)IDB_GENERATE_IMAGE,
+			((LPCREATESTRUCT) lParam)->hInstance,
 			NULL);
 }
 
+// 开始/停止BUTTON的处理函数
 void startStopButtonProc(HWND hWnd)
 {
 	HWND buttonHandle = GetDlgItem(hWnd, IDB_START_STOP);
@@ -277,7 +279,7 @@ void recMousePos(POINT point)
 	fflush(g_file);
 }
 
-// 打开一个窗口，将所有的点描画在这个窗口上
+// 打开一个窗口，将文件中记录的所有的点描画在这个窗口上
 bool generateImage(HWND hWnd)
 {
 	if (NULL != g_file)
@@ -298,8 +300,8 @@ bool generateImage(HWND hWnd)
 	size_t blankPos = 0;
 	POINT point = {0, 0};
 
+	// 注册窗口
 	registerImageClass(hInst);
-
 
 	// 窗口大小设置为720*40，应该将客户区域设置为此大小，但函数AdjustWindowRectEx()不好用。
 	HWND hWndDesktop = CreateWindow(L"ImageWindow", L"Image", WS_SYSMENU | WS_CAPTION , 0, 0, 720, 450, NULL, NULL, hInst, NULL);
@@ -324,6 +326,7 @@ bool generateImage(HWND hWnd)
 	return true;
 }
 
+// 注册图像显示窗口
 ATOM registerImageClass(HINSTANCE hInstance)
 {
 	WNDCLASSEX wcex;
@@ -333,16 +336,17 @@ ATOM registerImageClass(HINSTANCE hInstance)
 	wcex.cbClsExtra		= 0;
 	wcex.cbWndExtra		= 0;
 	wcex.hInstance		= hInst;
-	wcex.hIcon			= LoadIcon(hInst, MAKEINTRESOURCE(IDI_RECORDER));
+	wcex.hIcon			= 0;
 	wcex.hCursor		= LoadCursor(NULL, IDC_ARROW);
 	wcex.hbrBackground	= (HBRUSH)(COLOR_WINDOW+1);
 	wcex.lpszMenuName	= NULL;
 	wcex.lpszClassName	= L"ImageWindow";
-	wcex.hIconSm		= LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
+	wcex.hIconSm		= 0;
 
 	return RegisterClassEx(&wcex);
 }
 
+// 图像显示窗口的消息处理函数
 LRESULT CALLBACK imageWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	return DefWindowProc(hWnd, message, wParam, lParam);

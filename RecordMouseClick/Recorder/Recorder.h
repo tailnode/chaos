@@ -1,10 +1,12 @@
 #pragma once
 
 #include <windows.h>
-#include "resource.h"
 
 #define LOG_FILE_PATH		"E://mouseInfo.log"
-#define IMAGE_FILE_PATH		
+
+#define IDB_START_STOP		0x01	// 开始/结束按钮
+#define IDB_GENERATE_IMAGE	0x02	// 生成按钮
+
 
 void (*setMouseHook)(HWND);
 void (*unSetMouseHook)(void);
