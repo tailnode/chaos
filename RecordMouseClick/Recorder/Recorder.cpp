@@ -15,8 +15,8 @@ using namespace std;
 
 // 全局变量:
 HINSTANCE hInst;								// 当前实例
-TCHAR szTitle[MAX_LOADSTRING];					// 标题栏文本
-TCHAR szWindowClass[MAX_LOADSTRING];			// 主窗口类名
+TCHAR szTitle[MAX_LOADSTRING] = L"Recorder";	// 标题栏文本
+TCHAR szWindowClass[MAX_LOADSTRING] = L"RecoderClass";			// 主窗口类名
 FILE* g_file = NULL;
 
 // 此代码模块中包含的函数的前向声明:
@@ -35,11 +35,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
  	// TODO: 在此放置代码。
 	MSG msg;
-	HACCEL hAccelTable;
-
-	// 初始化全局字符串
-	LoadString(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
-	LoadString(hInstance, IDC_RECORDER, szWindowClass, MAX_LOADSTRING);
 	MyRegisterClass(hInstance);
 
 	// 执行应用程序初始化:
@@ -55,8 +50,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 		return FALSE;
 	}
 
-	hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_RECORDER));
-
 #if DEBUG_OUTPUT_CONSOLE
 	// 打开console
 	AllocConsole();
@@ -67,11 +60,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	// 主消息循环:
 	while (GetMessage(&msg, NULL, 0, 0))
 	{
-		if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
-		{
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		}
+		DispatchMessage(&msg);
 	}
 
 	return (int) msg.wParam;
@@ -122,12 +111,12 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 	wcex.cbClsExtra		= 0;
 	wcex.cbWndExtra		= 0;
 	wcex.hInstance		= hInstance;
-	wcex.hIcon			= LoadIcon(hInstance, MAKEINTRESOURCE(IDI_RECORDER));
+	wcex.hIcon			= 0;
 	wcex.hCursor		= LoadCursor(NULL, IDC_ARROW);
 	wcex.hbrBackground	= (HBRUSH)(COLOR_WINDOW+1);
-	wcex.lpszMenuName	= MAKEINTRESOURCE(IDC_RECORDER);
+	wcex.lpszMenuName	= 0;
 	wcex.lpszClassName	= szWindowClass;
-	wcex.hIconSm		= LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
+	wcex.hIconSm		= 0;
 
 	return RegisterClassEx(&wcex);
 }
