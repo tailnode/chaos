@@ -1,6 +1,6 @@
 ﻿namespace MouseRecorder
 {
-    partial class imageForm
+    partial class ImageForm
     {
         /// <summary>
         /// Required designer variable.
@@ -51,6 +51,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(720, 450);
             this.Controls.Add(this.panel1);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "imageForm";

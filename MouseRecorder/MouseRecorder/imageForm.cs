@@ -9,9 +9,9 @@ using System.Windows.Forms;
 
 namespace MouseRecorder
 {
-    public partial class imageForm : Form
+    public partial class ImageForm : Form
     {
-        public imageForm()
+        public ImageForm()
         {
             InitializeComponent();
         }
