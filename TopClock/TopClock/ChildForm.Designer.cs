@@ -32,7 +32,9 @@
             this.TimeLable = new System.Windows.Forms.Label();
             this.oneMinTimer = new System.Windows.Forms.Timer(this.components);
             this.closeBtn = new System.Windows.Forms.PictureBox();
+            this.minBtn = new System.Windows.Forms.PictureBox();
             ((System.ComponentModel.ISupportInitialize)(this.closeBtn)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.minBtn)).BeginInit();
             this.SuspendLayout();
             // 
             // TimeLable
@@ -65,13 +67,25 @@
             this.closeBtn.TabStop = false;
             this.closeBtn.Click += new System.EventHandler(this.closeBtn_Click);
             // 
+            // minBtn
+            // 
+            this.minBtn.Image = global::TopClock.Properties.Resources.minimized;
+            this.minBtn.Location = new System.Drawing.Point(0, 0);
+            this.minBtn.Margin = new System.Windows.Forms.Padding(0);
+            this.minBtn.Name = "minBtn";
+            this.minBtn.Size = new System.Drawing.Size(5, 5);
+            this.minBtn.TabIndex = 2;
+            this.minBtn.TabStop = false;
+            this.minBtn.Click += new System.EventHandler(this.minBtn_Click);
+            // 
             // ChildForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(13F, 28F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
-            this.ClientSize = new System.Drawing.Size(73, 28);
+            this.ClientSize = new System.Drawing.Size(116, 28);
+            this.Controls.Add(this.minBtn);
             this.Controls.Add(this.closeBtn);
             this.Controls.Add(this.TimeLable);
             this.Font = new System.Drawing.Font("Consolas", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -85,6 +99,7 @@
             this.TransparencyKey = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.Load += new System.EventHandler(this.TopClockForm_Load);
             ((System.ComponentModel.ISupportInitialize)(this.closeBtn)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.minBtn)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -95,6 +110,7 @@
         private System.Windows.Forms.Label TimeLable;
         private System.Windows.Forms.Timer oneMinTimer;
         private System.Windows.Forms.PictureBox closeBtn;
+        private System.Windows.Forms.PictureBox minBtn;
     }
 }
 

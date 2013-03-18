@@ -1,10 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
 
@@ -20,11 +14,11 @@ namespace TopClock
         public const int SC_MOVE = 0xF010;
         public const int HTCAPTION = 0x0002;
 
-        Form childForm;
+        ChildForm childForm;
         public ParentForm()
         {
             InitializeComponent();
-            this.childForm = new ChildForm();
+            this.childForm = new ChildForm(this);
             this.childForm.Owner = this;
             this.childForm.Dock = DockStyle.Fill;
             this.childForm.Show();
@@ -55,6 +49,19 @@ namespace TopClock
         private void topmost_Tick(object sender, EventArgs e)
         {
             this.TopMost = true;
+        }
+
+        private void notifyIcon_MouseClick(object sender, MouseEventArgs e)
+        {
+            childForm.getTimer().Enabled = true;
+            topmost.Enabled = true;
+            childForm.updateTime();
+            this.WindowState = FormWindowState.Normal;
+        }
+
+        public Timer getTimer()
+        {
+            return topmost;
         }
     }
 }
