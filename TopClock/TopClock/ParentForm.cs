@@ -53,15 +53,23 @@ namespace TopClock
 
         private void notifyIcon_MouseClick(object sender, MouseEventArgs e)
         {
-            childForm.getTimer().Enabled = true;
-            topmost.Enabled = true;
-            childForm.updateTime();
-            this.WindowState = FormWindowState.Normal;
+            if (e.Button == MouseButtons.Left)
+            {
+                childForm.getTimer().Enabled = true;
+                topmost.Enabled = true;
+                childForm.updateTime();
+                this.WindowState = FormWindowState.Normal;
+            }
         }
 
         public Timer getTimer()
         {
             return topmost;
+        }
+
+        private void menu_exit_Click(object sender, EventArgs e)
+        {
+            Application.Exit();
         }
     }
 }

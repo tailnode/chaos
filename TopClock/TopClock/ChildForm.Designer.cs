@@ -96,6 +96,7 @@
             this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Form";
+            this.TopMost = true;
             this.TransparencyKey = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.Load += new System.EventHandler(this.TopClockForm_Load);
             ((System.ComponentModel.ISupportInitialize)(this.closeBtn)).EndInit();
@@ -108,9 +109,9 @@
         #endregion
 
         private System.Windows.Forms.Label TimeLable;
-        private System.Windows.Forms.Timer oneMinTimer;
         private System.Windows.Forms.PictureBox closeBtn;
         private System.Windows.Forms.PictureBox minBtn;
+        public System.Windows.Forms.Timer oneMinTimer;
     }
 }
 
