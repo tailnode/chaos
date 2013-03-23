@@ -71,5 +71,18 @@ namespace TopClock
         {
             Application.Exit();
         }
+
+        private void menu_Opened(object sender, EventArgs e)
+        {
+            topmost.Enabled = false;
+        }
+
+        private void menu_Closed(object sender, ToolStripDropDownClosedEventArgs e)
+        {
+            if (this.WindowState != FormWindowState.Minimized)
+            {
+                topmost.Enabled = true;
+            }
+        }
     }
 }
