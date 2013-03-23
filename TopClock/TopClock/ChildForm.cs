@@ -12,7 +12,6 @@ namespace TopClock
 {
     public partial class ChildForm : Form
     {
-        private DateTime time;
         private ParentForm parentForm;
 
         public ChildForm(ParentForm p)
@@ -20,11 +19,6 @@ namespace TopClock
             InitializeComponent();
             parentForm = p;
             updateTime();
-        }
-
-        private void TopClockForm_Load(object sender, EventArgs e)
-        {
-
         }
 
         private void oneMinTimer_Tick(object sender, EventArgs e)
@@ -35,8 +29,7 @@ namespace TopClock
         // 更新显示的时间
         public void updateTime()
         {
-            time = DateTime.Now;
-            TimeLable.Text = time.Hour.ToString() + ":" + time.Minute.ToString();
+            TimeLable.Text = DateTime.Now.ToShortTimeString();
         }
 
         private void closeBtn_Click(object sender, EventArgs e)

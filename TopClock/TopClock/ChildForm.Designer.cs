@@ -46,9 +46,9 @@
             this.TimeLable.Location = new System.Drawing.Point(0, 0);
             this.TimeLable.Margin = new System.Windows.Forms.Padding(0);
             this.TimeLable.Name = "TimeLable";
-            this.TimeLable.Size = new System.Drawing.Size(64, 28);
+            this.TimeLable.Size = new System.Drawing.Size(25, 28);
             this.TimeLable.TabIndex = 0;
-            this.TimeLable.Text = "time";
+            this.TimeLable.Text = "t";
             // 
             // oneMinTimer
             // 
@@ -58,9 +58,13 @@
             // 
             // closeBtn
             // 
+            this.closeBtn.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.closeBtn.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.closeBtn.Image = global::TopClock.Properties.Resources.close;
-            this.closeBtn.Location = new System.Drawing.Point(64, 0);
+            this.closeBtn.Location = new System.Drawing.Point(45, 2);
             this.closeBtn.Margin = new System.Windows.Forms.Padding(0);
+            this.closeBtn.MaximumSize = new System.Drawing.Size(5, 5);
+            this.closeBtn.MinimumSize = new System.Drawing.Size(5, 5);
             this.closeBtn.Name = "closeBtn";
             this.closeBtn.Size = new System.Drawing.Size(5, 5);
             this.closeBtn.TabIndex = 1;
@@ -69,9 +73,13 @@
             // 
             // minBtn
             // 
+            this.minBtn.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.minBtn.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.minBtn.Image = global::TopClock.Properties.Resources.minimized;
-            this.minBtn.Location = new System.Drawing.Point(0, 0);
+            this.minBtn.Location = new System.Drawing.Point(45, 10);
             this.minBtn.Margin = new System.Windows.Forms.Padding(0);
+            this.minBtn.MaximumSize = new System.Drawing.Size(5, 5);
+            this.minBtn.MinimumSize = new System.Drawing.Size(5, 5);
             this.minBtn.Name = "minBtn";
             this.minBtn.Size = new System.Drawing.Size(5, 5);
             this.minBtn.TabIndex = 2;
@@ -82,23 +90,23 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(13F, 28F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.AutoSize = true;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
-            this.ClientSize = new System.Drawing.Size(116, 28);
+            this.ClientSize = new System.Drawing.Size(70, 28);
             this.Controls.Add(this.minBtn);
             this.Controls.Add(this.closeBtn);
             this.Controls.Add(this.TimeLable);
             this.Font = new System.Drawing.Font("Consolas", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Margin = new System.Windows.Forms.Padding(7);
+            this.MaximizeBox = false;
+            this.MinimizeBox = false;
             this.Name = "ChildForm";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
             this.Text = "Form";
             this.TopMost = true;
             this.TransparencyKey = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
-            this.Load += new System.EventHandler(this.TopClockForm_Load);
             ((System.ComponentModel.ISupportInitialize)(this.closeBtn)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.minBtn)).EndInit();
             this.ResumeLayout(false);

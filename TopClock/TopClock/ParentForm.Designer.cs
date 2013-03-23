@@ -59,13 +59,13 @@
             this.menu_exit});
             this.menu.Name = "menu";
             this.menu.ShowImageMargin = false;
-            this.menu.Size = new System.Drawing.Size(128, 48);
+            this.menu.Size = new System.Drawing.Size(68, 26);
             // 
             // menu_exit
             // 
             this.menu_exit.Name = "menu_exit";
             this.menu_exit.ShowShortcutKeys = false;
-            this.menu_exit.Size = new System.Drawing.Size(127, 22);
+            this.menu_exit.Size = new System.Drawing.Size(67, 22);
             this.menu_exit.Text = "退出";
             this.menu_exit.Click += new System.EventHandler(this.menu_exit_Click);
             // 
@@ -73,15 +73,18 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.AutoSize = true;
-            this.ClientSize = new System.Drawing.Size(75, 28);
+            this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.ClientSize = new System.Drawing.Size(70, 28);
             this.ControlBox = false;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+            this.MaximumSize = new System.Drawing.Size(70, 28);
+            this.MinimumSize = new System.Drawing.Size(70, 28);
             this.Name = "ParentForm";
             this.Opacity = 0.01;
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
-            this.Text = "ChildForm";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
+            this.Text = "ParentForm";
             this.TopMost = true;
             this.Load += new System.EventHandler(this.ParentForm_Load);
             this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.ParentForm_MouseDown);
