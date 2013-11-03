@@ -29,23 +29,29 @@ namespace MuteSwitch
 
         private void muteSwicth_MouseClick(object sender, MouseEventArgs e)
         {
-            if (e.Button != MouseButtons.Left)
+            if (e.Button == MouseButtons.Left)
             {
-                return;
+                if (state != MuteState.MUTE_ON)
+                {
+                    muteOn();
+                    state = MuteState.MUTE_ON;
+                    updateNotifyIcon();
+                }
+            }
+            else if (e.Button == MouseButtons.Right)
+            {
+                if (state != MuteState.MUTE_OFF)
+                {
+                    muteOff();
+                    state = MuteState.MUTE_OFF;
+                    updateNotifyIcon();
+                }
+            }
+            else if (e.Button == MouseButtons.Middle)
+            {
+                Application.Exit();
             }
 
-            if (MuteState.MUTE_UNKNOW == state || MuteState.MUTE_OFF == state)
-            {
-                muteOn();
-                state = MuteState.MUTE_ON;
-            }
-            else
-            {
-                muteOff();
-                state = MuteState.MUTE_OFF;
-            }
-
-            updateNotifyIcon();
 
         }
 
@@ -71,6 +77,11 @@ namespace MuteSwitch
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Application.Exit();
+        }
+
+        protected override void SetVisibleCore(bool value)
+        {
+            base.SetVisibleCore(false);
         }
     }
 }
