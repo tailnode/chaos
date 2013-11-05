@@ -13,7 +13,7 @@ void counting_sort(unsigned int* array, unsigned int num)
 	unsigned int* array_out = (unsigned int*)malloc(sizeof(unsigned int)*num);
 	unsigned int* array_count = (unsigned int*)malloc(sizeof(unsigned int)*(max_num + 1));
 
-	memset(array_count, 0, max_num+1);
+	memset(array_count, 0, sizeof(unsigned int)*(max_num+1));
 
 	for (unsigned int i = 0; i < num; ++i)
 		++array_count[array[i]];
@@ -21,8 +21,8 @@ void counting_sort(unsigned int* array, unsigned int num)
 	for (unsigned int i = 1; i <= max_num; ++i)
 		array_count[i] += array_count[i-1];
 
-	for (unsigned int i = 0; i < num; ++i)
-		array_out[--array_count[array[i]]] = array[i];
+	for (unsigned int i = num; i > 0; --i)
+		array_out[--array_count[array[i-1]]] = array[i-1];
 
 	memcpy(array, array_out, sizeof(unsigned int)*num);
 

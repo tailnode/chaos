@@ -9,6 +9,7 @@ void merge_sort(int* array, unsigned int num);
 void heap_sort(int* array, unsigned int num);
 void quick_sort(int* array, unsigned int num);
 void counting_sort(unsigned int* array, unsigned int num);
+void radix_sort(unsigned int* array, unsigned int num);
 void empty(int* array, unsigned int num);
 
 #endif // __SORT_H__

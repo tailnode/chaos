@@ -98,6 +98,7 @@ sort_func find_sort_func(char* sort_name)
 		{"heap", heap_sort},
 		{"quick", quick_sort},
 		{"counting", counting_sort},
+		{"radix", radix_sort},
 	};
 
 	for (unsigned int i = 0; i < sizeof(func_matrix)/sizeof(func_matrix[0]); ++i)
