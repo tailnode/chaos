@@ -3,6 +3,7 @@
 #define FREEGLUT_STATIC
 #include <GL/glut.h>
 #include <windows.h>
+#include <StopWatch.h>
 
 GLBatch triangleBatch;
 GLShaderManager shaderManager;
@@ -17,7 +18,18 @@ bool started = false;
 
 void changeSize(int w, int h)
 {
-	glViewport(0, 0, w/2, h/2);
+	// set viewport square and in the window's center
+	int x = 0;
+    int y = 0;
+    if (w < h) {
+        y = (h - w) / 2;
+        h = w;
+    } else {
+        x = (w - h) / 2;
+        w = h;
+    }
+
+	glViewport(x, y, w, h);
 }
 
 void setupRC()
@@ -35,18 +47,21 @@ void renderScene()
 	printf("%s\n", __FUNCTION__);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
+    static CStopWatch timer;
+    static float lastTime = 0;
+    float elapsedSec = timer.GetElapsedSeconds();
+
 	// generate random color
 	static GLfloat color[] = {0.0f, 0.0f, 0.0f, 1.0f};
-	color[0] += 0.01f;
-	color[1] += 0.02f;
-	color[2] += 0.03f;
-	if (color[0] > 1.0f) color[0] = 0.0f;
-	if (color[1] > 1.0f) color[1] = 0.0f;
-	if (color[2] > 1.0f) color[2] = 0.0f;
+    if (elapsedSec - lastTime > 0.1) {
+        lastTime = elapsedSec;
+        color[0] = (color[0] + 0.01f > 1.0f) ? 0.0f : (color[0] + 0.01f);
+        color[1] = (color[1] + 0.02f > 1.0f) ? 0.0f : (color[1] + 0.02f);
+        color[2] = (color[2] + 0.03f > 1.0f) ? 0.0f : (color[2] + 0.03f);
+    }
 
 	// generate new angle
-	static GLfloat angle = -5;
-	angle = (angle + 5 > 360) ? (angle + 5 - 360) : (angle + 5);
+	float angle = elapsedSec * 60;
 
 	M3DMatrix44f translationMatrix, rotationMatrix, finalMatrix;
 	m3dTranslationMatrix44(translationMatrix, xPos, yPos, 0);
@@ -58,6 +73,7 @@ void renderScene()
 
 	glutSwapBuffers();
 	started = true;
+    glutPostRedisplay();
 }
 
 void keyFunc(int key, int x, int y)
