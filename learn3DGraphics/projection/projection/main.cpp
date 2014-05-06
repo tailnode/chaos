@@ -7,6 +7,7 @@
 #include <GLFrustum.h>
 #include <GLMatrixStack.h>
 #include <GLGeometryTransform.h>
+#include <GLFrame.h>
 
 GLShaderManager shaderManager;
 GLTriangleBatch torusBatch;
@@ -18,6 +19,7 @@ GLFrustum frustum;
 GLMatrixStack modelViewMatrix;
 GLMatrixStack projectionMatrix;
 GLGeometryTransform transformPipeline;
+GLFrame cameraFrame;
 
 void changeSize(int w, int h)
 {
@@ -42,19 +44,25 @@ void renderScene()
     GLfloat green[] = {0.0f, 1.0f, 0.0f, 1.0f};
 
     modelViewMatrix.PushMatrix();
+
+    M3DMatrix44f cameraMatrix;
+    cameraFrame.GetCameraMatrix(cameraMatrix);
+    modelViewMatrix.PushMatrix(cameraMatrix);
+
     shaderManager.UseStockShader(GLT_SHADER_FLAT, transformPipeline.GetModelViewProjectionMatrix(), black);
     floorBatch.Draw();
 
     modelViewMatrix.Translate(0, 0, -2.5f);
+    modelViewMatrix.PushMatrix();
     modelViewMatrix.Rotate(torusAngle, 0, 1, 0);
 
     shaderManager.UseStockShader(GLT_SHADER_FLAT, transformPipeline.GetModelViewProjectionMatrix(), red);
 	torusBatch.Draw();
 	
     modelViewMatrix.PopMatrix();
-
     modelViewMatrix.PushMatrix();
-    modelViewMatrix.Translate(0.5f, 0.0f, -2.5f);
+
+    modelViewMatrix.Translate(0.5f, 0.0f, 0.0f);
     modelViewMatrix.Rotate(sphereAngle, 0, -1, 0);
     modelViewMatrix.Translate(0.5f, 0.0f, 0.0f);
     shaderManager.UseStockShader(GLT_SHADER_FLAT, transformPipeline.GetModelViewProjectionMatrix(), green);
@@ -62,12 +70,12 @@ void renderScene()
 
     modelViewMatrix.PopMatrix();
 
-    modelViewMatrix.PushMatrix();
-    modelViewMatrix.Translate(-0.5f, 0.0f, -2.5f);
+    modelViewMatrix.Translate(-0.5f, 0.0f, 0.0f);
     modelViewMatrix.Rotate(sphereAngle, 0, 1, 0);
     modelViewMatrix.Translate(0.5f, 0.0f, 0.0f);
     shaderManager.UseStockShader(GLT_SHADER_FLAT, transformPipeline.GetModelViewProjectionMatrix(), green);
     sphereBatch2.Draw();
+    modelViewMatrix.PopMatrix();
     modelViewMatrix.PopMatrix();
 
 	glutSwapBuffers();
@@ -76,6 +84,45 @@ void renderScene()
 
 void keyFunc(int key, int x, int y)
 {
+    static const float step = 0.1f;
+    static const float angle = m3dDegToRad(1);
+    switch (key)
+    {
+    case GLUT_KEY_UP:
+        cameraFrame.MoveForward(step);
+        break;
+
+    case GLUT_KEY_DOWN:
+        cameraFrame.MoveForward(-step);
+        break;
+
+    case GLUT_KEY_LEFT:
+        cameraFrame.RotateWorld(angle, 0, 1, 0);
+        break;
+
+    case GLUT_KEY_RIGHT:
+        cameraFrame.RotateWorld(-angle, 0, 1, 0);
+        break;
+
+    case GLUT_KEY_HOME:
+        cameraFrame.RotateWorld(angle, 1, 0, 0);
+        break;
+
+    case GLUT_KEY_END:
+        cameraFrame.RotateWorld(-angle, 1, 0, 0);
+        break;
+
+    case GLUT_KEY_PAGE_DOWN:
+        cameraFrame.MoveUp(-step);
+        break;
+
+    case GLUT_KEY_PAGE_UP:
+        cameraFrame.MoveUp(step);
+        break;
+
+	default:
+		break;
+    }
 }
 
 void setupRC()
