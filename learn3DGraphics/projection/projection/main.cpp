@@ -11,8 +11,7 @@
 
 GLShaderManager shaderManager;
 GLTriangleBatch torusBatch;
-GLTriangleBatch sphereBatch1;
-GLTriangleBatch sphereBatch2;
+GLTriangleBatch sphereBatch;
 GLBatch floorBatch;
 GLFrustum frustum;
 
@@ -66,7 +65,7 @@ void renderScene()
     modelViewMatrix.Rotate(sphereAngle, 0, -1, 0);
     modelViewMatrix.Translate(0.5f, 0.0f, 0.0f);
     shaderManager.UseStockShader(GLT_SHADER_FLAT, transformPipeline.GetModelViewProjectionMatrix(), green);
-    sphereBatch1.Draw();
+    sphereBatch.Draw();
 
     modelViewMatrix.PopMatrix();
 
@@ -74,7 +73,7 @@ void renderScene()
     modelViewMatrix.Rotate(sphereAngle, 0, 1, 0);
     modelViewMatrix.Translate(0.5f, 0.0f, 0.0f);
     shaderManager.UseStockShader(GLT_SHADER_FLAT, transformPipeline.GetModelViewProjectionMatrix(), green);
-    sphereBatch2.Draw();
+    sphereBatch.Draw();
     modelViewMatrix.PopMatrix();
     modelViewMatrix.PopMatrix();
 
@@ -133,8 +132,7 @@ void setupRC()
     glEnable(GL_DEPTH_TEST);
     
 	gltMakeTorus(torusBatch, 0.25f, 0.10f, 30, 30);
-    gltMakeSphere(sphereBatch1, 0.10f, 30, 15);
-    gltMakeSphere(sphereBatch2, 0.10f, 30, 15);
+    gltMakeSphere(sphereBatch, 0.10f, 30, 15);
 
     floorBatch.Begin(GL_LINES, 324);
     for (float i = -20; i <= 20; i += 0.5)
