@@ -28,18 +28,18 @@ GLFrame spheres[SPHERE_NUMS];
 void initSpheres()
 {
     for (int i = 0; i < SPHERE_NUMS; i++) {
-		float x = (rand() % 400 - 200) * 0.1f;
-		float y = (rand() % 100 - 50) * 0.1f;
-		float z = (rand() % 400 - 200) * 0.1f;
-		spheres[i].SetOrigin(x, y, z);
-	}
+        float x = (rand() % 400 - 200) * 0.1f;
+        float y = (rand() % 100 - 50) * 0.1f;
+        float z = (rand() % 400 - 200) * 0.1f;
+        spheres[i].SetOrigin(x, y, z);
+    }
 }
 
 void changeSize(int w, int h)
 {
-	if (h == 0) h = 1;
-	glViewport(0, 0, w, h);
-	frustum.SetPerspective(35, (float)w / h, 1, 100);
+    if (h == 0) h = 1;
+    glViewport(0, 0, w, h);
+    frustum.SetPerspective(35, (float)w / h, 1, 100);
     projectionMatrix.LoadMatrix(frustum.GetProjectionMatrix());
 
     transformPipeline.SetMatrixStacks(modelViewMatrix, projectionMatrix);
@@ -47,13 +47,13 @@ void changeSize(int w, int h)
 
 void renderScene()
 {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     static CStopWatch timer;
     float torusAngle = timer.GetElapsedSeconds() * 120;
     float sphereAngle = timer.GetElapsedSeconds() * 120;
 
-	GLfloat red[] = {1.0f, 0.0f, 0.0f, 1.0f};
+    GLfloat red[] = {1.0f, 0.0f, 0.0f, 1.0f};
     GLfloat black[] = {0.0f, 0.0f, 0.0f, 1.0f};
     GLfloat green[] = {0.0f, 1.0f, 0.0f, 1.0f};
 
@@ -71,8 +71,8 @@ void renderScene()
     modelViewMatrix.Rotate(torusAngle, 0, 1, 0);
 
     shaderManager.UseStockShader(GLT_SHADER_FLAT, transformPipeline.GetModelViewProjectionMatrix(), red);
-	torusBatch.Draw();
-	
+    torusBatch.Draw();
+
     modelViewMatrix.PopMatrix();
     modelViewMatrix.PushMatrix();
 
@@ -102,8 +102,8 @@ void renderScene()
     modelViewMatrix.PopMatrix();
     modelViewMatrix.PopMatrix();
 
-	glutSwapBuffers();
-	glutPostRedisplay();
+    glutSwapBuffers();
+    glutPostRedisplay();
 }
 
 void keyFunc(int key, int x, int y)
@@ -144,19 +144,19 @@ void keyFunc(int key, int x, int y)
         cameraFrame.MoveUp(step);
         break;
 
-	default:
-		break;
+    default:
+        break;
     }
 }
 
 void setupRC()
 {
-	glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-	shaderManager.InitializeStockShaders();
+    glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+    shaderManager.InitializeStockShaders();
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     glEnable(GL_DEPTH_TEST);
-    
-	gltMakeTorus(torusBatch, 0.25f, 0.10f, 30, 30);
+
+    gltMakeTorus(torusBatch, 0.25f, 0.10f, 30, 30);
     gltMakeSphere(sphereBatch, 0.10f, 30, 15);
 
     floorBatch.Begin(GL_LINES, 324);
@@ -164,7 +164,7 @@ void setupRC()
     {
         floorBatch.Vertex3f(i, -0.5, 20);
         floorBatch.Vertex3f(i, -0.5, -20);
-        
+
         floorBatch.Vertex3f(20, -0.5, i);
         floorBatch.Vertex3f(-20, -0.5, i);
     }
@@ -174,24 +174,24 @@ void setupRC()
 }
 int main(int argc, char* argv[])
 {
-	gltSetWorkingDirectory(argv[0]);
+    gltSetWorkingDirectory(argv[0]);
 
-	glutInit(&argc, argv);
-	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH| GLUT_STENCIL);
-	glutInitWindowSize(800, 600);
-	glutCreateWindow("Projection");
-	glutReshapeFunc(changeSize);
-	glutDisplayFunc(renderScene);
-	glutSpecialFunc(keyFunc);
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH| GLUT_STENCIL);
+    glutInitWindowSize(800, 600);
+    glutCreateWindow("Projection");
+    glutReshapeFunc(changeSize);
+    glutDisplayFunc(renderScene);
+    glutSpecialFunc(keyFunc);
 
-	GLenum err = glewInit();
-	if (GLEW_OK != err) {
-		fprintf(stderr, "GLEW Error: %s\n", glewGetErrorString(err));
-		return 1;
-	}
+    GLenum err = glewInit();
+    if (GLEW_OK != err) {
+        fprintf(stderr, "GLEW Error: %s\n", glewGetErrorString(err));
+        return 1;
+    }
 
-	srand(time(NULL));
-	setupRC();
-	glutMainLoop();
-	return 0;
+    srand(time(NULL));
+    setupRC();
+    glutMainLoop();
+    return 0;
 }
