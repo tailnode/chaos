@@ -8,6 +8,8 @@
 #include <GLMatrixStack.h>
 #include <GLGeometryTransform.h>
 #include <GLFrame.h>
+#include <time.h>
+#include <stdlib.h>
 
 GLShaderManager shaderManager;
 GLTriangleBatch torusBatch;
@@ -19,6 +21,19 @@ GLMatrixStack modelViewMatrix;
 GLMatrixStack projectionMatrix;
 GLGeometryTransform transformPipeline;
 GLFrame cameraFrame;
+
+static const int SPHERE_NUMS = 50;
+GLFrame spheres[SPHERE_NUMS];
+
+void initSpheres()
+{
+    for (int i = 0; i < SPHERE_NUMS; i++) {
+		float x = (rand() % 400 - 200) * 0.1f;
+		float y = (rand() % 100 - 50) * 0.1f;
+		float z = (rand() % 400 - 200) * 0.1f;
+		spheres[i].SetOrigin(x, y, z);
+	}
+}
 
 void changeSize(int w, int h)
 {
@@ -69,11 +84,21 @@ void renderScene()
 
     modelViewMatrix.PopMatrix();
 
+    modelViewMatrix.PushMatrix();
     modelViewMatrix.Translate(-0.5f, 0.0f, 0.0f);
     modelViewMatrix.Rotate(sphereAngle, 0, 1, 0);
     modelViewMatrix.Translate(0.5f, 0.0f, 0.0f);
     shaderManager.UseStockShader(GLT_SHADER_FLAT, transformPipeline.GetModelViewProjectionMatrix(), green);
     sphereBatch.Draw();
+    modelViewMatrix.PopMatrix();
+
+    for (int i = 0; i < SPHERE_NUMS; i++) {
+        modelViewMatrix.PushMatrix();
+        modelViewMatrix.MultMatrix(spheres[i]);
+        shaderManager.UseStockShader(GLT_SHADER_FLAT, transformPipeline.GetModelViewProjectionMatrix(), green);
+        sphereBatch.Draw();
+        modelViewMatrix.PopMatrix();
+    }
     modelViewMatrix.PopMatrix();
     modelViewMatrix.PopMatrix();
 
@@ -144,6 +169,8 @@ void setupRC()
         floorBatch.Vertex3f(-20, -0.5, i);
     }
     floorBatch.End();
+
+    initSpheres();
 }
 int main(int argc, char* argv[])
 {
@@ -163,6 +190,7 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
+	srand(time(NULL));
 	setupRC();
 	glutMainLoop();
 	return 0;
