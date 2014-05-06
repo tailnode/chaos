@@ -94,6 +94,7 @@ void renderScene()
 
     for (int i = 0; i < SPHERE_NUMS; i++) {
         modelViewMatrix.PushMatrix();
+        modelViewMatrix.Rotate(sphereAngle / 2, 0, 1, 0);
         modelViewMatrix.MultMatrix(spheres[i]);
         shaderManager.UseStockShader(GLT_SHADER_FLAT, transformPipeline.GetModelViewProjectionMatrix(), green);
         sphereBatch.Draw();
