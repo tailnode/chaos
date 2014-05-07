@@ -63,6 +63,10 @@ void renderScene()
     cameraFrame.GetCameraMatrix(cameraMatrix);
     modelViewMatrix.PushMatrix(cameraMatrix);
 
+    M3DVector4f lightPos = {0.0f, 10.0f, 5.0f, 1.0f};
+    M3DVector4f lightEyePos;
+    m3dTransformVector4(lightEyePos, lightPos, cameraMatrix);
+
     shaderManager.UseStockShader(GLT_SHADER_FLAT, transformPipeline.GetModelViewProjectionMatrix(), black);
     floorBatch.Draw();
 
@@ -70,7 +74,8 @@ void renderScene()
     modelViewMatrix.PushMatrix();
     modelViewMatrix.Rotate(torusAngle, 0, 1, 0);
 
-    shaderManager.UseStockShader(GLT_SHADER_FLAT, transformPipeline.GetModelViewProjectionMatrix(), red);
+    shaderManager.UseStockShader(GLT_SHADER_POINT_LIGHT_DIFF, transformPipeline.GetModelViewMatrix(), 
+        transformPipeline.GetProjectionMatrix(), lightEyePos, red);
     torusBatch.Draw();
 
     modelViewMatrix.PopMatrix();
@@ -79,7 +84,8 @@ void renderScene()
     modelViewMatrix.Translate(0.5f, 0.0f, 0.0f);
     modelViewMatrix.Rotate(sphereAngle, 0, -1, 0);
     modelViewMatrix.Translate(0.5f, 0.0f, 0.0f);
-    shaderManager.UseStockShader(GLT_SHADER_FLAT, transformPipeline.GetModelViewProjectionMatrix(), green);
+    shaderManager.UseStockShader(GLT_SHADER_POINT_LIGHT_DIFF, transformPipeline.GetModelViewMatrix(), 
+        transformPipeline.GetProjectionMatrix(), lightEyePos, green);
     sphereBatch.Draw();
 
     modelViewMatrix.PopMatrix();
@@ -88,7 +94,8 @@ void renderScene()
     modelViewMatrix.Translate(-0.5f, 0.0f, 0.0f);
     modelViewMatrix.Rotate(sphereAngle, 0, 1, 0);
     modelViewMatrix.Translate(0.5f, 0.0f, 0.0f);
-    shaderManager.UseStockShader(GLT_SHADER_FLAT, transformPipeline.GetModelViewProjectionMatrix(), green);
+    shaderManager.UseStockShader(GLT_SHADER_POINT_LIGHT_DIFF, transformPipeline.GetModelViewMatrix(), 
+        transformPipeline.GetProjectionMatrix(), lightEyePos, green);
     sphereBatch.Draw();
     modelViewMatrix.PopMatrix();
 
@@ -96,7 +103,8 @@ void renderScene()
         modelViewMatrix.PushMatrix();
         modelViewMatrix.Rotate(sphereAngle / 2, 0, 1, 0);
         modelViewMatrix.MultMatrix(spheres[i]);
-        shaderManager.UseStockShader(GLT_SHADER_FLAT, transformPipeline.GetModelViewProjectionMatrix(), green);
+        shaderManager.UseStockShader(GLT_SHADER_POINT_LIGHT_DIFF, transformPipeline.GetModelViewMatrix(), 
+            transformPipeline.GetProjectionMatrix(), lightEyePos, green);
         sphereBatch.Draw();
         modelViewMatrix.PopMatrix();
     }
@@ -154,7 +162,7 @@ void setupRC()
 {
     glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
     shaderManager.InitializeStockShaders();
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glEnable(GL_DEPTH_TEST);
 
     gltMakeTorus(torusBatch, 0.25f, 0.10f, 30, 30);
