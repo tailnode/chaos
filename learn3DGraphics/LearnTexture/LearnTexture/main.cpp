@@ -16,6 +16,43 @@ GLFrustum frustum;
 GLGeometryTransform pipelineTransform;
 GLBatch cuboidBatch;
 GLFrame cameraFrame;
+GLFrame objectFrame;
+float cuboidLength = 0.1f;
+float cuboidWidth = 1.0f;
+float cuboidHeigth = 0.2f;
+GLuint textureID;
+
+bool LoadTGATexture(const char *szFileName, GLenum minFilter, GLenum magFilter, GLenum wrapMode)
+{
+	GLbyte *pBits;
+	int nWidth, nHeight, nComponents;
+	GLenum eFormat;
+	
+	// Read the texture bits
+	pBits = gltReadTGABits(szFileName, &nWidth, &nHeight, &nComponents, &eFormat);
+	if(pBits == NULL) 
+		return false;
+	
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapMode);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapMode);
+	
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilter);
+    
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	glTexImage2D(GL_TEXTURE_2D, 0, nComponents, nWidth, nHeight, 0,
+				 eFormat, GL_UNSIGNED_BYTE, pBits);
+	
+    free(pBits);
+    
+    if(minFilter == GL_LINEAR_MIPMAP_LINEAR || 
+       minFilter == GL_LINEAR_MIPMAP_NEAREST ||
+       minFilter == GL_NEAREST_MIPMAP_LINEAR ||
+       minFilter == GL_NEAREST_MIPMAP_NEAREST)
+        glGenerateMipmap(GL_TEXTURE_2D);
+    
+	return true;
+}
 
 void changeSize(int w, int h)
 {
@@ -28,56 +65,89 @@ void changeSize(int w, int h)
 void renderScene()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
     modelViewM.PushMatrix();
+
+    modelViewM.Translate(0, 0, -3);
 
     M3DMatrix44f cameraM;
     cameraFrame.GetCameraMatrix(cameraM);
     modelViewM.MultMatrix(cameraM);
 
-    modelViewM.Translate(0, 0, -3);
+    M3DMatrix44f objectM;
+    objectFrame.GetMatrix(objectM);
+    modelViewM.MultMatrix(objectM);
 
-//    glBindTexture(GL_TEXTURE_2D, textureID);
+    M3DVector4f lightPos = {0.0f, 10.0f, 5.0f, 1.0f};
+    M3DVector4f lightEyePos;
+    m3dTransformVector4(lightEyePos, lightPos, cameraM);
+    GLfloat whiteLight[] = {1.0f, 1.0f, 1.0f, 1.0f};
 
-    GLfloat lightPos[] = {1, 1, 1};
-    GLfloat lightColor[] = {1, 1, 1, 1};
+    glBindTexture(GL_TEXTURE_2D, textureID);
     shaderManager.UseStockShader(GLT_SHADER_TEXTURE_POINT_LIGHT_DIFF, 
                                  pipelineTransform.GetModelViewMatrix(),
                                  pipelineTransform.GetProjectionMatrix(), 
-                                 lightPos, lightColor, 0);
+                                 lightEyePos, whiteLight, 0);
+
     cuboidBatch.Draw();
 
+    modelViewM.PopMatrix();
+
+    glutSwapBuffers();
     glutPostRedisplay();
 }
 
 void keyFunc(int key, int x, int y)
 {
+    static const float step = 0.1f;
+    static const float angle = m3dDegToRad(2);
+    switch (key)
+    {
+    case GLUT_KEY_UP:
+        objectFrame.RotateWorld(-angle, 1, 0, 0);
+        break;
+
+    case GLUT_KEY_DOWN:
+        objectFrame.RotateWorld(angle, 1, 0, 0);
+        break;
+
+    case GLUT_KEY_LEFT:
+        objectFrame.RotateWorld(-angle, 0, 1, 0);
+        break;
+
+    case GLUT_KEY_RIGHT:
+        objectFrame.RotateWorld(angle, 0, 1, 0);
+        break;
+
+    case GLUT_KEY_HOME:
+        cameraFrame.MoveForward(step);
+        break;
+
+    case GLUT_KEY_END:
+        cameraFrame.MoveForward(-step);
+        break;
+
+    default:
+        break;
+    }
+
+    glutPostRedisplay();
 }
 
 void generateCuboidBatch(GLBatch& batch, float length, float width, float height)
 {
-    M3DVector3f frontLeftBottom = {0, 0, 0};
-    M3DVector3f frontLeftUp = {0, 0, 0};
-    M3DVector3f frontRightBottom = {0, 0, 0};
-    M3DVector3f frontRightUp = {0, 0, 0};
-    M3DVector3f backLeftBottom = {0, 0, 0};
-    M3DVector3f backLeftUp = {0, 0, 0};
-    M3DVector3f backRightBottom = {0, 0, 0};
-    M3DVector3f backRightUp = {0, 0, 0};
+    float halfLength = length / 2;
+    float halfWidth = width / 2;
+    float halfHeight = height / 2;
 
-    frontRightBottom[0] = length;
-    frontRightUp[0] = length;
-    backRightBottom[0] = length;
-    backRightUp[0] = length;
-
-    frontLeftUp[1] = height;
-    frontRightUp[1] = height;
-    backLeftUp[1] = height;
-    backRightUp[1] = height;
-
-    frontLeftBottom[2] = width;
-    frontLeftUp[2] = width;
-    frontRightBottom[2] = width;
-    frontRightUp[2] = width;
+    M3DVector3f frontLeftBottom  = {-halfLength, -halfHeight,  halfWidth};
+    M3DVector3f frontLeftTop     = {-halfLength,  halfHeight,  halfWidth};
+    M3DVector3f frontRightBottom = { halfLength, -halfHeight,  halfWidth};
+    M3DVector3f frontRightTop    = { halfLength,  halfHeight,  halfWidth};
+    M3DVector3f backLeftBottom   = {-halfLength, -halfHeight, -halfWidth};
+    M3DVector3f backLeftTop      = {-halfLength,  halfHeight, -halfWidth};
+    M3DVector3f backRightBottom  = { halfLength, -halfHeight, -halfWidth};
+    M3DVector3f backRightTop     = { halfLength,  halfHeight, -halfWidth};
 
     batch.Begin(GL_QUADS, 24, 1);
     
@@ -86,41 +156,106 @@ void generateCuboidBatch(GLBatch& batch, float length, float width, float height
     batch.MultiTexCoord2f(0, 0, 1);
     batch.Vertex3fv(frontLeftBottom);
     batch.Normal3f(0, -1, 0);
-    batch.MultiTexCoord2f(0, 1, 1);
-    batch.Vertex3fv(frontRightBottom);
+    batch.MultiTexCoord2f(0, 0, 0);
+    batch.Vertex3fv(backLeftBottom);
     batch.Normal3f(0, -1, 0);
     batch.MultiTexCoord2f(0, 1, 0);
     batch.Vertex3fv(backRightBottom);
     batch.Normal3f(0, -1, 0);
-    batch.MultiTexCoord2f(0, 0, 0);
-    batch.Vertex3fv(backLeftBottom);
+    batch.MultiTexCoord2f(0, 1, 1);
+    batch.Vertex3fv(frontRightBottom);
 
     // up face
     batch.Normal3f(0, 1, 0);
     batch.MultiTexCoord2f(0, 0, 1);
-    batch.Vertex3fv(frontLeftUp);
+    batch.Vertex3fv(frontLeftTop);
     batch.Normal3f(0, 1, 0);
     batch.MultiTexCoord2f(0, 1, 1);
-    batch.Vertex3fv(frontRightUp);
+    batch.Vertex3fv(frontRightTop);
     batch.Normal3f(0, 1, 0);
     batch.MultiTexCoord2f(0, 1, 0);
-    batch.Vertex3fv(backRightUp);
+    batch.Vertex3fv(backRightTop);
     batch.Normal3f(0, 1, 0);
     batch.MultiTexCoord2f(0, 0, 0);
-    batch.Vertex3fv(backLeftUp);
+    batch.Vertex3fv(backLeftTop);
+
+    // front face
+    batch.Normal3f(0, 0, 1);
+    batch.MultiTexCoord2f(0, 0, 1);
+    batch.Vertex3fv(frontLeftTop);
+    batch.Normal3f(0, 0, 1);
+    batch.MultiTexCoord2f(0, 0, 0);
+    batch.Vertex3fv(frontLeftBottom);
+    batch.Normal3f(0, 0, 1);
+    batch.MultiTexCoord2f(0, 1, 0);
+    batch.Vertex3fv(frontRightBottom);
+    batch.Normal3f(0, 0, 1);
+    batch.MultiTexCoord2f(0, 1, 1);
+    batch.Vertex3fv(frontRightTop);
+
+    // back face
+    batch.Normal3f(0, 0, -1);
+    batch.MultiTexCoord2f(0, 0, 1);
+    batch.Vertex3fv(backLeftTop);
+    batch.Normal3f(0, 0, -1);
+    batch.MultiTexCoord2f(0, 1, 1);
+    batch.Vertex3fv(backRightTop);
+    batch.Normal3f(0, 0, -1);
+    batch.MultiTexCoord2f(0, 1, 0);
+    batch.Vertex3fv(backRightBottom);
+    batch.Normal3f(0, 0, -1);
+    batch.MultiTexCoord2f(0, 0, 0);
+    batch.Vertex3fv(backLeftBottom);
+
+    // left face
+    batch.Normal3f(-1, 0, 0);
+    batch.MultiTexCoord2f(0, 0, 1);
+    batch.Vertex3fv(backLeftTop);
+    batch.Normal3f(-1, 0, 0);
+    batch.MultiTexCoord2f(0, 0, 0);
+    batch.Vertex3fv(backLeftBottom);
+    batch.Normal3f(-1, 0, 0);
+    batch.MultiTexCoord2f(0, 1, 0);
+    batch.Vertex3fv(frontLeftBottom);
+    batch.Normal3f(-1, 0, 0);
+    batch.MultiTexCoord2f(0, 1, 1);
+    batch.Vertex3fv(frontLeftTop);
+
+    // right face
+    batch.Normal3f(1, 0, 0);
+    batch.MultiTexCoord2f(0, 0, 1);
+    batch.Vertex3fv(backRightTop);
+    batch.Normal3f(1, 0, 0);
+    batch.MultiTexCoord2f(0, 1, 1);
+    batch.Vertex3fv(frontRightTop);
+    batch.Normal3f(1, 0, 0);
+    batch.MultiTexCoord2f(0, 1, 0);
+    batch.Vertex3fv(frontRightBottom);
+    batch.Normal3f(1, 0, 0);
+    batch.MultiTexCoord2f(0, 0, 0);
+    batch.Vertex3fv(backRightBottom);
+
+    batch.End();
 }
 
 void setupRC()
 {
     glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+    glEnable(GL_DEPTH_TEST);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     shaderManager.InitializeStockShaders();
     pipelineTransform.SetMatrixStacks(modelViewM, projectionM);
 
-    generateCuboidBatch(cuboidBatch, 0.1f, 1.0f, 0.2f);
+    generateCuboidBatch(cuboidBatch, cuboidLength, cuboidWidth, cuboidHeigth);
+
+    glGenTextures(1, &textureID);
+    glBindTexture(GL_TEXTURE_2D, textureID);
+    LoadTGATexture("stone.tga", GL_LINEAR, GL_NEAREST, GL_CLAMP_TO_EDGE);
 }
 
 void cleanRC()
 {
+    glDeleteTextures(1, &textureID);
 }
 
 int main(int argc, char* argv[])
