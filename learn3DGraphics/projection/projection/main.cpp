@@ -24,6 +24,40 @@ GLFrame cameraFrame;
 
 static const int SPHERE_NUMS = 50;
 GLFrame spheres[SPHERE_NUMS];
+GLuint spheresTextureID[SPHERE_NUMS];
+GLuint textureID[3];
+
+bool LoadTGATexture(const char *szFileName, GLenum minFilter, GLenum magFilter, GLenum wrapMode)
+{
+	GLbyte *pBits;
+	int nWidth, nHeight, nComponents;
+	GLenum eFormat;
+	
+	// Read the texture bits
+	pBits = gltReadTGABits(szFileName, &nWidth, &nHeight, &nComponents, &eFormat);
+	if(pBits == NULL) 
+		return false;
+	
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapMode);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapMode);
+	
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilter);
+    
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	glTexImage2D(GL_TEXTURE_2D, 0, nComponents, nWidth, nHeight, 0,
+				 eFormat, GL_UNSIGNED_BYTE, pBits);
+	
+    free(pBits);
+    
+    if(minFilter == GL_LINEAR_MIPMAP_LINEAR || 
+       minFilter == GL_LINEAR_MIPMAP_NEAREST ||
+       minFilter == GL_NEAREST_MIPMAP_LINEAR ||
+       minFilter == GL_NEAREST_MIPMAP_NEAREST)
+        glGenerateMipmap(GL_TEXTURE_2D);
+    
+	return true;
+}
 
 void initSpheres()
 {
@@ -32,6 +66,7 @@ void initSpheres()
         float y = (rand() % 100 - 50) * 0.1f;
         float z = (rand() % 400 - 200) * 0.1f;
         spheres[i].SetOrigin(x, y, z);
+        spheresTextureID[i] = textureID[rand() % 2];
     }
 }
 
@@ -64,6 +99,7 @@ void renderScene()
     modelViewMatrix.PushMatrix(cameraMatrix);
 
     M3DVector4f lightPos = {0.0f, 10.0f, 5.0f, 1.0f};
+    GLfloat whiteLight[] = {1.0f, 1.0f, 1.0f, 1.0f};
     M3DVector4f lightEyePos;
     m3dTransformVector4(lightEyePos, lightPos, cameraMatrix);
 
@@ -74,8 +110,11 @@ void renderScene()
     modelViewMatrix.PushMatrix();
     modelViewMatrix.Rotate(torusAngle, 0, 1, 0);
 
-    shaderManager.UseStockShader(GLT_SHADER_POINT_LIGHT_DIFF, transformPipeline.GetModelViewMatrix(), 
-        transformPipeline.GetProjectionMatrix(), lightEyePos, red);
+    glBindTexture(GL_TEXTURE_2D, textureID[2]);
+    shaderManager.UseStockShader(GLT_SHADER_TEXTURE_POINT_LIGHT_DIFF, 
+                                 transformPipeline.GetModelViewMatrix(),
+                                 transformPipeline.GetProjectionMatrix(), 
+                                 lightEyePos, whiteLight, 0);
     torusBatch.Draw();
 
     modelViewMatrix.PopMatrix();
@@ -84,8 +123,16 @@ void renderScene()
     modelViewMatrix.Translate(0.5f, 0.0f, 0.0f);
     modelViewMatrix.Rotate(sphereAngle, 0, -1, 0);
     modelViewMatrix.Translate(0.5f, 0.0f, 0.0f);
+#if 0
     shaderManager.UseStockShader(GLT_SHADER_POINT_LIGHT_DIFF, transformPipeline.GetModelViewMatrix(), 
         transformPipeline.GetProjectionMatrix(), lightEyePos, green);
+#else
+    glBindTexture(GL_TEXTURE_2D, textureID[0]);
+    shaderManager.UseStockShader(GLT_SHADER_TEXTURE_POINT_LIGHT_DIFF, 
+                                 transformPipeline.GetModelViewMatrix(),
+                                 transformPipeline.GetProjectionMatrix(), 
+                                 lightEyePos, whiteLight, 0);
+#endif
     sphereBatch.Draw();
 
     modelViewMatrix.PopMatrix();
@@ -94,17 +141,28 @@ void renderScene()
     modelViewMatrix.Translate(-0.5f, 0.0f, 0.0f);
     modelViewMatrix.Rotate(sphereAngle, 0, 1, 0);
     modelViewMatrix.Translate(0.5f, 0.0f, 0.0f);
+#if 0
     shaderManager.UseStockShader(GLT_SHADER_POINT_LIGHT_DIFF, transformPipeline.GetModelViewMatrix(), 
         transformPipeline.GetProjectionMatrix(), lightEyePos, green);
+#else
+    glBindTexture(GL_TEXTURE_2D, textureID[1]);
+    shaderManager.UseStockShader(GLT_SHADER_TEXTURE_POINT_LIGHT_DIFF, 
+                                 transformPipeline.GetModelViewMatrix(),
+                                 transformPipeline.GetProjectionMatrix(), 
+                                 lightEyePos, whiteLight, 0);
+#endif
     sphereBatch.Draw();
     modelViewMatrix.PopMatrix();
 
     for (int i = 0; i < SPHERE_NUMS; i++) {
         modelViewMatrix.PushMatrix();
-        modelViewMatrix.Rotate(sphereAngle / 2, 0, 1, 0);
         modelViewMatrix.MultMatrix(spheres[i]);
-        shaderManager.UseStockShader(GLT_SHADER_POINT_LIGHT_DIFF, transformPipeline.GetModelViewMatrix(), 
-            transformPipeline.GetProjectionMatrix(), lightEyePos, green);
+        modelViewMatrix.Rotate(sphereAngle / 2, 0, 1, 0);
+        glBindTexture(GL_TEXTURE_2D, spheresTextureID[i]);
+        shaderManager.UseStockShader(GLT_SHADER_TEXTURE_POINT_LIGHT_DIFF, 
+                                     transformPipeline.GetModelViewMatrix(),
+                                     transformPipeline.GetProjectionMatrix(), 
+                                     lightEyePos, whiteLight, 0);
         sphereBatch.Draw();
         modelViewMatrix.PopMatrix();
     }
@@ -178,9 +236,23 @@ void setupRC()
         floorBatch.Vertex3f(-20, -0.5, i);
     }
     floorBatch.End();
-
+    
+    glGenTextures(3, textureID);
+    glBindTexture(GL_TEXTURE_2D, textureID[0]);
+    LoadTGATexture("stone.tga", GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR_MIPMAP_LINEAR, GL_CLAMP_TO_EDGE);
+    glBindTexture(GL_TEXTURE_2D, textureID[1]);
+    LoadTGATexture("black_white.tga", GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR_MIPMAP_LINEAR, GL_CLAMP_TO_EDGE);
+    glBindTexture(GL_TEXTURE_2D, textureID[2]);
+    LoadTGATexture("1.tga", GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR_MIPMAP_LINEAR, GL_CLAMP_TO_EDGE);
+    
     initSpheres();
 }
+
+void cleanRC()
+{
+    glDeleteTextures(3, textureID);
+}
+
 int main(int argc, char* argv[])
 {
     gltSetWorkingDirectory(argv[0]);
@@ -202,5 +274,6 @@ int main(int argc, char* argv[])
     srand(time(NULL));
     setupRC();
     glutMainLoop();
+    cleanRC();
     return 0;
 }

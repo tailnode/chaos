@@ -15,13 +15,15 @@ GLMatrixStack projectionM;
 GLFrustum frustum;
 GLGeometryTransform pipelineTransform;
 GLBatch cuboidBatch;
-GLBatch cuboidBatch1;
 GLFrame cameraFrame;
 GLFrame objectFrame;
 float cuboidLength = 0.1f;
 float cuboidWidth = 1.0f;
 float cuboidHeigth = 0.2f;
-GLuint textureID;
+bool isAnisotropy = false;
+bool isAnisotropySupported = false;
+GLfloat largest = 1.0f;
+GLuint textureID[2];
 
 bool LoadTGATexture(const char *szFileName, GLenum minFilter, GLenum magFilter, GLenum wrapMode)
 {
@@ -86,8 +88,8 @@ void renderScene()
     objectFrame.GetMatrix(objectM);
     modelViewM.MultMatrix(objectM);
 
-    glBindTexture(GL_TEXTURE_2D, textureID);
-#if 1
+    glBindTexture(GL_TEXTURE_2D, textureID[0]);
+#if 0
     shaderManager.UseStockShader(GLT_SHADER_TEXTURE_POINT_LIGHT_DIFF, 
                                  pipelineTransform.GetModelViewMatrix(),
                                  pipelineTransform.GetProjectionMatrix(), 
@@ -105,12 +107,20 @@ void renderScene()
     float angle = timer.GetElapsedSeconds() * 120;
     modelViewM.Translate(0.5f, 0.6f, -5);
     modelViewM.Rotate(angle, 1, 1, 1);
+    modelViewM.Scale(0.5/cuboidLength, 0.3/cuboidHeigth, 0.4/cuboidWidth);
+    glBindTexture(GL_TEXTURE_2D, textureID[1]);
+#if 0
     shaderManager.UseStockShader(GLT_SHADER_TEXTURE_POINT_LIGHT_DIFF, 
                                  pipelineTransform.GetModelViewMatrix(),
                                  pipelineTransform.GetProjectionMatrix(), 
                                  lightEyePos, whiteLight, 0);
+#else
+    shaderManager.UseStockShader(GLT_SHADER_TEXTURE_REPLACE, 
+                                 pipelineTransform.GetModelViewProjectionMatrix(),
+                                 0);
+#endif
 
-    cuboidBatch1.Draw();
+    cuboidBatch.Draw();
 
     modelViewM.PopMatrix();
 
@@ -148,6 +158,16 @@ void keyFunc(int key, int x, int y)
         cameraFrame.MoveForward(-step);
         break;
 
+    // enable/disable anisotropy
+    case GLUT_KEY_F1:
+        if (isAnisotropySupported) {
+            isAnisotropy = !isAnisotropy;
+            if (isAnisotropy)
+                glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, largest);
+            else
+                glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 1.0f);
+        }
+        break;
     default:
         break;
     }
@@ -202,16 +222,16 @@ void generateCuboidBatch(GLBatch& batch, float length, float width, float height
 
     // front face
     batch.Normal3f(0, 0, 1);
-    batch.MultiTexCoord2f(0, 0, 1);
+    batch.MultiTexCoord2f(0, 0, 3);
     batch.Vertex3fv(frontLeftTop);
     batch.Normal3f(0, 0, 1);
     batch.MultiTexCoord2f(0, 0, 0);
     batch.Vertex3fv(frontLeftBottom);
     batch.Normal3f(0, 0, 1);
-    batch.MultiTexCoord2f(0, 1, 0);
+    batch.MultiTexCoord2f(0, 3, 0);
     batch.Vertex3fv(frontRightBottom);
     batch.Normal3f(0, 0, 1);
-    batch.MultiTexCoord2f(0, 1, 1);
+    batch.MultiTexCoord2f(0, 3, 3);
     batch.Vertex3fv(frontRightTop);
 
     // back face
@@ -230,16 +250,16 @@ void generateCuboidBatch(GLBatch& batch, float length, float width, float height
 
     // left face
     batch.Normal3f(-1, 0, 0);
-    batch.MultiTexCoord2f(0, 0, 1);
+    batch.MultiTexCoord2f(0, 0, 3);
     batch.Vertex3fv(backLeftTop);
     batch.Normal3f(-1, 0, 0);
     batch.MultiTexCoord2f(0, 0, 0);
     batch.Vertex3fv(backLeftBottom);
     batch.Normal3f(-1, 0, 0);
-    batch.MultiTexCoord2f(0, 1, 0);
+    batch.MultiTexCoord2f(0, 3, 0);
     batch.Vertex3fv(frontLeftBottom);
     batch.Normal3f(-1, 0, 0);
-    batch.MultiTexCoord2f(0, 1, 1);
+    batch.MultiTexCoord2f(0, 3, 3);
     batch.Vertex3fv(frontLeftTop);
 
     // right face
@@ -268,16 +288,23 @@ void setupRC()
     pipelineTransform.SetMatrixStacks(modelViewM, projectionM);
 
     generateCuboidBatch(cuboidBatch, cuboidLength, cuboidWidth, cuboidHeigth);
-    generateCuboidBatch(cuboidBatch1, 0.5f, 0.3f, 0.4f);
 
-    glGenTextures(1, &textureID);
-    glBindTexture(GL_TEXTURE_2D, textureID);
+    glGenTextures(2, textureID);
+    glBindTexture(GL_TEXTURE_2D, textureID[0]);
     LoadTGATexture("stone.tga", GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR_MIPMAP_LINEAR, GL_CLAMP_TO_EDGE);
+    glBindTexture(GL_TEXTURE_2D, textureID[1]);
+    LoadTGATexture("black_white.tga", GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR_MIPMAP_LINEAR, GL_REPEAT);
+
+    if(gltIsExtSupported("GL_EXT_texture_filter_anisotropic")) {
+        isAnisotropySupported = true;
+        glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &largest);
+        printf("anisotropy is supported, largest %f\n", largest);
+    }
 }
 
 void cleanRC()
 {
-    glDeleteTextures(1, &textureID);
+    glDeleteTextures(2, textureID);
 }
 
 int main(int argc, char* argv[])
