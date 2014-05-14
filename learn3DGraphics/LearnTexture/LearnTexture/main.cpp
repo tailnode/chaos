@@ -15,6 +15,7 @@ GLMatrixStack projectionM;
 GLFrustum frustum;
 GLGeometryTransform pipelineTransform;
 GLBatch cuboidBatch;
+GLBatch cuboidBatch1;
 GLFrame cameraFrame;
 GLFrame objectFrame;
 float cuboidLength = 0.1f;
@@ -68,28 +69,48 @@ void renderScene()
 
     modelViewM.PushMatrix();
 
-    modelViewM.Translate(0, 0, -3);
-
     M3DMatrix44f cameraM;
     cameraFrame.GetCameraMatrix(cameraM);
     modelViewM.MultMatrix(cameraM);
-
-    M3DMatrix44f objectM;
-    objectFrame.GetMatrix(objectM);
-    modelViewM.MultMatrix(objectM);
 
     M3DVector4f lightPos = {0.0f, 10.0f, 5.0f, 1.0f};
     M3DVector4f lightEyePos;
     m3dTransformVector4(lightEyePos, lightPos, cameraM);
     GLfloat whiteLight[] = {1.0f, 1.0f, 1.0f, 1.0f};
 
+    modelViewM.PushMatrix();
+
+    modelViewM.Translate(0, 0, -3);
+
+    M3DMatrix44f objectM;
+    objectFrame.GetMatrix(objectM);
+    modelViewM.MultMatrix(objectM);
+
     glBindTexture(GL_TEXTURE_2D, textureID);
+#if 1
+    shaderManager.UseStockShader(GLT_SHADER_TEXTURE_POINT_LIGHT_DIFF, 
+                                 pipelineTransform.GetModelViewMatrix(),
+                                 pipelineTransform.GetProjectionMatrix(), 
+                                 lightEyePos, whiteLight, 0);
+#else
+    shaderManager.UseStockShader(GLT_SHADER_TEXTURE_REPLACE, 
+                                 pipelineTransform.GetModelViewProjectionMatrix(),
+                                 0);
+#endif
+    cuboidBatch.Draw();
+
+    modelViewM.PopMatrix();
+
+    static CStopWatch timer;
+    float angle = timer.GetElapsedSeconds() * 120;
+    modelViewM.Translate(0.5f, 0.6f, -5);
+    modelViewM.Rotate(angle, 1, 1, 1);
     shaderManager.UseStockShader(GLT_SHADER_TEXTURE_POINT_LIGHT_DIFF, 
                                  pipelineTransform.GetModelViewMatrix(),
                                  pipelineTransform.GetProjectionMatrix(), 
                                  lightEyePos, whiteLight, 0);
 
-    cuboidBatch.Draw();
+    cuboidBatch1.Draw();
 
     modelViewM.PopMatrix();
 
@@ -100,7 +121,7 @@ void renderScene()
 void keyFunc(int key, int x, int y)
 {
     static const float step = 0.1f;
-    static const float angle = m3dDegToRad(2);
+    static const float angle = m3dDegToRad(4);
     switch (key)
     {
     case GLUT_KEY_UP:
@@ -247,10 +268,11 @@ void setupRC()
     pipelineTransform.SetMatrixStacks(modelViewM, projectionM);
 
     generateCuboidBatch(cuboidBatch, cuboidLength, cuboidWidth, cuboidHeigth);
+    generateCuboidBatch(cuboidBatch1, 0.5f, 0.3f, 0.4f);
 
     glGenTextures(1, &textureID);
     glBindTexture(GL_TEXTURE_2D, textureID);
-    LoadTGATexture("stone.tga", GL_LINEAR, GL_NEAREST, GL_CLAMP_TO_EDGE);
+    LoadTGATexture("stone.tga", GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR_MIPMAP_LINEAR, GL_CLAMP_TO_EDGE);
 }
 
 void cleanRC()
