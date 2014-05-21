@@ -4,7 +4,7 @@
 in vec4 vertexPos;
 in vec3 vertexNormal;
 
-uniform vec4 objectColor;
+uniform vec4 diffuseColor;
 uniform vec3 lightPos;
 uniform mat4 mvpMatrix;
 uniform mat4 mvMatrix;
@@ -21,8 +21,8 @@ void main()
     vec3 lightDirEye = normalize(lightPos - vertexPosEye.xyz/vertexPosEye.w);
     float intensity = max(0.0, dot(lightDirEye, vertexNormalEye));
 
-    color.rgb = intensity * objectColor.rgb;
-    color.a = objectColor.a;
+    color.rgb = intensity * diffuseColor.rgb;
+    color.a = diffuseColor.a;
 
     gl_Position = mvpMatrix * vertexPos;
 }

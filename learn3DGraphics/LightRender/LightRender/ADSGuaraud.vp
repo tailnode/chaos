@@ -1,0 +1,44 @@
+#version 330
+
+in vec4 vertexPos;
+in vec3 vertexNormal;
+
+uniform vec4 ambientColor;
+uniform vec4 diffuseColor;
+uniform vec4 specularColor;
+uniform vec3 lightPos;
+uniform mat4 mvpMatrix;
+uniform mat4 mvMatrix;
+uniform mat3 normalMatrix;
+
+out vec4 color;
+
+void main()
+{
+    // ---------caculate diffuse color--------------
+    vec4 vertexPosEye = mvMatrix * vertexPos;
+    vec3 vertexNormalEye = normalMatrix * vertexNormal;
+
+    vec3 lightDirEye = normalize(lightPos - vertexPosEye.xyz/vertexPosEye.w);
+    float intensity = max(0.0, dot(lightDirEye, vertexNormalEye));
+
+    color.rgb = intensity * diffuseColor.rgb;
+    color.a = diffuseColor.a;
+    // ---------------------------------------------
+
+    // ------------add ambientColor-----------------
+    color += ambientColor;
+    // ---------------------------------------------
+
+    // ------------add specularColor----------------
+    vec3 reflection = normalize(reflect(-lightDirEye, vertexNormalEye));
+    //float spec = max(0.0, dot(vertexNormalEye, lightDirEye));
+    float spec = max(0.0, dot(vertexNormalEye, reflection));
+    if (intensity != 0) {
+        float fSpec = pow(spec, 128.0);
+        color.rgb += vec3(fSpec, fSpec, fSpec); 
+    }
+    // ---------------------------------------------
+
+    gl_Position = mvpMatrix * vertexPos;
+}
