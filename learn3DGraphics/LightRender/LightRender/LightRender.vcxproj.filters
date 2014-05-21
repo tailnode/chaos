@@ -15,9 +15,9 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="ADSGuaraud.vp" />
     <None Include="diffuseLightShader.fp" />
     <None Include="diffuseLightShader.vp" />
+    <None Include="ADSGouraud.vp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">

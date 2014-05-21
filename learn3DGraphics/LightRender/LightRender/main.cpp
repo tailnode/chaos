@@ -23,7 +23,7 @@ GLTriangleBatch sphereBatch;
 
 enum ShaderType {
     DIFFUSE_SHADER = 0,
-    ADSGUARAUD_SHADER,
+    ADSGOURAUD_SHADER,
     SHADER_NUM
 };
 GLuint shader[SHADER_NUM];
@@ -65,7 +65,7 @@ void selectShader(ShaderType type)
     if (locNormalMatrix == -1)
         printf("[%d] error\n", __LINE__);
 
-    if (shaderType == ADSGUARAUD_SHADER) {
+    if (shaderType == ADSGOURAUD_SHADER) {
         locAmbientColor = glGetUniformLocation(shader[shaderType], "ambientColor");
         if (locAmbientColor == -1)
             printf("[%d] error\n", __LINE__);
@@ -92,13 +92,13 @@ void setupRC()
     if (shader[DIFFUSE_SHADER] == NULL)
         printf("load diffuseLightShader error\n");
 
-    shader[ADSGUARAUD_SHADER] = gltLoadShaderPairWithAttributes("ADSGuaraud.vp", "diffuseLightShader.fp",
+    shader[ADSGOURAUD_SHADER] = gltLoadShaderPairWithAttributes("ADSGouraud.vp", "diffuseLightShader.fp",
         2, GLT_ATTRIBUTE_VERTEX, "vertexPos", GLT_ATTRIBUTE_NORMAL, "vertexNormal");
 
-    if (shader[ADSGUARAUD_SHADER] == NULL)
-        printf("load ADSGuaraudShader error\n");
+    if (shader[ADSGOURAUD_SHADER] == NULL)
+        printf("load ADSGouraudShader error\n");
 
-    selectShader(ADSGUARAUD_SHADER);
+    selectShader(ADSGOURAUD_SHADER);
 }
 
 void renderScene()
@@ -121,7 +121,7 @@ void renderScene()
         glUniformMatrix4fv(locMvpMatrix, 1, GL_FALSE, pipelineTransform.GetModelViewProjectionMatrix());
         glUniformMatrix4fv(locMvMatrix, 1, GL_FALSE, pipelineTransform.GetModelViewMatrix());
         glUniformMatrix3fv(locNormalMatrix, 1, GL_FALSE, pipelineTransform.GetNormalMatrix());
-        if (shaderType == ADSGUARAUD_SHADER) {
+        if (shaderType == ADSGOURAUD_SHADER) {
             glUniform4fv(locAmbientColor, 1, ambientColor);
             glUniform4fv(locSpecularColor, 1, specularColor);
 

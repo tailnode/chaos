@@ -79,7 +79,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <None Include="ADSGuaraud.vp" />
+    <None Include="ADSGouraud.vp" />
     <None Include="diffuseLightShader.fp" />
     <None Include="diffuseLightShader.vp" />
   </ItemGroup>
