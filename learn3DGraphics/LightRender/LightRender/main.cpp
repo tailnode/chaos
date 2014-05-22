@@ -20,10 +20,12 @@ GLGeometryTransform pipelineTransform;
 GLFrame cameraFrame;
 GLTriangleBatch torusBatch;
 GLTriangleBatch sphereBatch;
+const unsigned int REDRAW_INTERVAL = 10;
 
 enum ShaderType {
     DIFFUSE_SHADER = 0,
     ADSGOURAUD_SHADER,
+    ADSPHONG_SHADER,
     SHADER_NUM
 };
 GLuint shader[SHADER_NUM];
@@ -65,7 +67,7 @@ void selectShader(ShaderType type)
     if (locNormalMatrix == -1)
         printf("[%d] error\n", __LINE__);
 
-    if (shaderType == ADSGOURAUD_SHADER) {
+    if (shaderType == ADSGOURAUD_SHADER || shaderType == ADSPHONG_SHADER) {
         locAmbientColor = glGetUniformLocation(shader[shaderType], "ambientColor");
         if (locAmbientColor == -1)
             printf("[%d] error\n", __LINE__);
@@ -98,7 +100,18 @@ void setupRC()
     if (shader[ADSGOURAUD_SHADER] == NULL)
         printf("load ADSGouraudShader error\n");
 
-    selectShader(ADSGOURAUD_SHADER);
+    shader[ADSPHONG_SHADER] = gltLoadShaderPairWithAttributes("ADSPhong.vp", "ADSPhong.fp",
+        2, GLT_ATTRIBUTE_VERTEX, "vertexPos", GLT_ATTRIBUTE_NORMAL, "vertexNormal");
+
+    if (shader[ADSPHONG_SHADER] == NULL)
+        printf("load ADSPhongShader error\n");
+    
+    selectShader(DIFFUSE_SHADER);
+}
+
+void timerCB(int millisec)
+{
+    glutPostRedisplay();
 }
 
 void renderScene()
@@ -110,7 +123,7 @@ void renderScene()
     modelViewM.PushMatrix(cameraFrame);
         float angle = elapsedTime * 120;
         modelViewM.Rotate(angle, 0, 1, 0);
-        GLfloat lightPos[] = { 0.0f, 0.0f, 0.0f };
+        GLfloat lightPos[] = { -100.0f, 100.0f, 100.0f };
         GLfloat ambientColor[] = {0, 0.0f, 0, 1};
         GLfloat diffuseColor[] = { 1, 0, 0, 1 };
         GLfloat specularColor[] = { 1, 1, 1, 1 };
@@ -121,10 +134,9 @@ void renderScene()
         glUniformMatrix4fv(locMvpMatrix, 1, GL_FALSE, pipelineTransform.GetModelViewProjectionMatrix());
         glUniformMatrix4fv(locMvMatrix, 1, GL_FALSE, pipelineTransform.GetModelViewMatrix());
         glUniformMatrix3fv(locNormalMatrix, 1, GL_FALSE, pipelineTransform.GetNormalMatrix());
-        if (shaderType == ADSGOURAUD_SHADER) {
+        if (shaderType == ADSGOURAUD_SHADER || shaderType == ADSPHONG_SHADER) {
             glUniform4fv(locAmbientColor, 1, ambientColor);
             glUniform4fv(locSpecularColor, 1, specularColor);
-
         }
 
         torusBatch.Draw();
@@ -154,7 +166,7 @@ void renderScene()
     modelViewM.PopMatrix();
 
     glutSwapBuffers();
-    glutPostRedisplay();
+    glutTimerFunc(REDRAW_INTERVAL, timerCB, 0);
 }
 
 void keyFunc(unsigned char key, int x, int y)

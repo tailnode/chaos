@@ -80,6 +80,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <None Include="ADSGouraud.vp" />
+    <None Include="ADSPhong.fp" />
+    <None Include="ADSPhong.vp" />
     <None Include="diffuseLightShader.fp" />
     <None Include="diffuseLightShader.vp" />
   </ItemGroup>

@@ -18,6 +18,8 @@
     <None Include="diffuseLightShader.fp" />
     <None Include="diffuseLightShader.vp" />
     <None Include="ADSGouraud.vp" />
+    <None Include="ADSPhong.vp" />
+    <None Include="ADSPhong.fp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
