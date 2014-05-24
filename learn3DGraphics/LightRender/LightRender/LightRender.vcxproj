@@ -84,6 +84,8 @@
     <None Include="ADSPhong.vp" />
     <None Include="diffuseLightShader.fp" />
     <None Include="diffuseLightShader.vp" />
+    <None Include="dissolve.fp" />
+    <None Include="dissolve.vp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />

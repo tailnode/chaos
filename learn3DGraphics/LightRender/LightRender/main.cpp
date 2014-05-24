@@ -26,6 +26,7 @@ enum ShaderType {
     DIFFUSE_SHADER = 0,
     ADSGOURAUD_SHADER,
     ADSPHONG_SHADER,
+    DISSOLVE_SHADER,
     SHADER_NUM
 };
 GLuint shader[SHADER_NUM];
@@ -38,6 +39,10 @@ GLint locLightPos;
 GLint locMvpMatrix;
 GLint locMvMatrix;
 GLint locNormalMatrix;
+GLint locTexture;
+GLint locDissolveThreshold;
+
+GLuint cloudTexture;
 
 void changeSize(int w, int h)
 {
@@ -67,7 +72,7 @@ void selectShader(ShaderType type)
     if (locNormalMatrix == -1)
         printf("[%d] error\n", __LINE__);
 
-    if (shaderType == ADSGOURAUD_SHADER || shaderType == ADSPHONG_SHADER) {
+    if (shaderType == ADSGOURAUD_SHADER || shaderType == ADSPHONG_SHADER || shaderType == DISSOLVE_SHADER) {
         locAmbientColor = glGetUniformLocation(shader[shaderType], "ambientColor");
         if (locAmbientColor == -1)
             printf("[%d] error\n", __LINE__);
@@ -75,12 +80,55 @@ void selectShader(ShaderType type)
         locSpecularColor = glGetUniformLocation(shader[shaderType], "specularColor");
         if (locSpecularColor == -1)
             printf("[%d] error\n", __LINE__);
+
+        if (shaderType == DISSOLVE_SHADER) {
+            locTexture = glGetUniformLocation(shader[shaderType], "cloudTexture");
+            locDissolveThreshold = glGetUniformLocation(shader[shaderType], "dissolveThreshold");
+        }
     }
+
+    if (shaderType == DISSOLVE_SHADER)
+        glDisable(GL_CULL_FACE);
+    else
+        glEnable(GL_CULL_FACE);
+}
+
+bool LoadTGATexture(const char *szFileName, GLenum minFilter, GLenum magFilter, GLenum wrapMode)
+{
+    GLbyte *pBits;
+    int nWidth, nHeight, nComponents;
+    GLenum eFormat;
+
+    // Read the texture bits
+    pBits = gltReadTGABits(szFileName, &nWidth, &nHeight, &nComponents, &eFormat);
+    if (pBits == NULL)
+        return false;
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapMode);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapMode);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilter);
+
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    glTexImage2D(GL_TEXTURE_2D, 0, nComponents, nWidth, nHeight, 0,
+        eFormat, GL_UNSIGNED_BYTE, pBits);
+
+    free(pBits);
+
+    if (minFilter == GL_LINEAR_MIPMAP_LINEAR ||
+        minFilter == GL_LINEAR_MIPMAP_NEAREST ||
+        minFilter == GL_NEAREST_MIPMAP_LINEAR ||
+        minFilter == GL_NEAREST_MIPMAP_NEAREST)
+        glGenerateMipmap(GL_TEXTURE_2D);
+
+    return true;
 }
 
 void setupRC()
 {
     glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     cameraFrame.MoveForward(3);
@@ -105,8 +153,18 @@ void setupRC()
 
     if (shader[ADSPHONG_SHADER] == NULL)
         printf("load ADSPhongShader error\n");
+
+    shader[DISSOLVE_SHADER] = gltLoadShaderPairWithAttributes("dissolve.vp", "dissolve.fp",
+        3, GLT_ATTRIBUTE_VERTEX, "vertexPos", GLT_ATTRIBUTE_NORMAL, "vertexNormal", GLT_ATTRIBUTE_TEXTURE0, "texCoords");
+
+    if (shader[DISSOLVE_SHADER] == NULL)
+        printf("load dissolveShader error\n");
     
     selectShader(DIFFUSE_SHADER);
+
+    glGenTextures(1, &cloudTexture);
+    glBindTexture(GL_TEXTURE_2D, cloudTexture);
+    LoadTGATexture("Clouds.tga", GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE);
 }
 
 void timerCB(int millisec)
@@ -134,9 +192,22 @@ void renderScene()
         glUniformMatrix4fv(locMvpMatrix, 1, GL_FALSE, pipelineTransform.GetModelViewProjectionMatrix());
         glUniformMatrix4fv(locMvMatrix, 1, GL_FALSE, pipelineTransform.GetModelViewMatrix());
         glUniformMatrix3fv(locNormalMatrix, 1, GL_FALSE, pipelineTransform.GetNormalMatrix());
-        if (shaderType == ADSGOURAUD_SHADER || shaderType == ADSPHONG_SHADER) {
+        if (shaderType == ADSGOURAUD_SHADER || shaderType == ADSPHONG_SHADER || shaderType == DISSOLVE_SHADER) {
             glUniform4fv(locAmbientColor, 1, ambientColor);
             glUniform4fv(locSpecularColor, 1, specularColor);
+
+            if (shaderType == DISSOLVE_SHADER) {
+                glUniform1i(locTexture, 0);
+                static const float DISSOLVE_TIME = 7.8f;
+                static const float MAX_DISSOLVE_VALUE = 0.7f;
+                float time = fmod(elapsedTime, DISSOLVE_TIME * 2);
+                float dissolveThreshold = 1.0f;
+                if (time < DISSOLVE_TIME)
+                    dissolveThreshold = MAX_DISSOLVE_VALUE / DISSOLVE_TIME * time;
+                else
+                    dissolveThreshold = -MAX_DISSOLVE_VALUE / DISSOLVE_TIME * time + 2 * MAX_DISSOLVE_VALUE;
+                glUniform1f(locDissolveThreshold, dissolveThreshold);
+            }
         }
 
         torusBatch.Draw();

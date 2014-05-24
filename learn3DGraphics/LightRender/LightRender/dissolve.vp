@@ -1,0 +1,25 @@
+#version 330
+
+in vec4 vertexPos;
+in vec3 vertexNormal;
+in vec2 texCoords;
+
+uniform vec3 lightPos;
+uniform mat4 mvpMatrix;
+uniform mat4 mvMatrix;
+uniform mat3 normalMatrix;
+
+out vec3 vertexNormalEye;
+out vec3 lightDirEye;
+out vec2 varyingTexCoords;
+
+void main()
+{
+    vertexNormalEye = normalMatrix * vertexNormal;
+
+    vec4 vertexPosEye = mvMatrix * vertexPos;
+    lightDirEye = normalize(lightPos - vertexPosEye.xyz/vertexPosEye.w);
+
+    varyingTexCoords = texCoords;
+    gl_Position = mvpMatrix * vertexPos;
+}

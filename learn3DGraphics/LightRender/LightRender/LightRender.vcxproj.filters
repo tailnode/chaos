@@ -20,6 +20,8 @@
     <None Include="ADSGouraud.vp" />
     <None Include="ADSPhong.vp" />
     <None Include="ADSPhong.fp" />
+    <None Include="dissolve.fp" />
+    <None Include="dissolve.vp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
