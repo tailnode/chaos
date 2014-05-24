@@ -8,12 +8,12 @@ uniform mat4 mvpMatrix;
 uniform mat4 mvMatrix;
 uniform mat3 normalMatrix;
 
-out vec3 vertextNormalEye;
+out vec3 vertexNormalEye;
 out vec3 lightDirEye;
 
 void main()
 {
-    vertextNormalEye = normalMatrix * vertexNormal;
+    vertexNormalEye = normalMatrix * vertexNormal;
 
     vec4 vertexPosEye = mvMatrix * vertexPos;
     lightDirEye = normalize(lightPos - vertexPosEye.xyz/vertexPosEye.w);
