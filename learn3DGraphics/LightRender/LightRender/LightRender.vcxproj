@@ -86,6 +86,8 @@
     <None Include="diffuseLightShader.vp" />
     <None Include="dissolve.fp" />
     <None Include="dissolve.vp" />
+    <None Include="rectangle.fp" />
+    <None Include="rectangle.vp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />

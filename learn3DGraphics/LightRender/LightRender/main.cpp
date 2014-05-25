@@ -20,6 +20,7 @@ GLGeometryTransform pipelineTransform;
 GLFrame cameraFrame;
 GLTriangleBatch torusBatch;
 GLTriangleBatch sphereBatch;
+GLBatch logoBatch;
 const unsigned int REDRAW_INTERVAL = 10;
 
 enum ShaderType {
@@ -43,6 +44,10 @@ GLint locTexture;
 GLint locDissolveThreshold;
 
 GLuint cloudTexture;
+GLuint rectangleTexShader;
+GLuint rectangleTexture;
+GLint locRectTexImage;
+GLint locRectMvpM;
 
 void changeSize(int w, int h)
 {
@@ -125,16 +130,55 @@ bool LoadTGATexture(const char *szFileName, GLenum minFilter, GLenum magFilter, 
     return true;
 }
 
+bool LoadTGATextureRect(const char *szFileName, GLenum minFilter, GLenum magFilter, GLenum wrapMode)
+{
+    GLbyte *pBits;
+    int nWidth, nHeight, nComponents;
+    GLenum eFormat;
+
+    // Read the texture bits
+    pBits = gltReadTGABits(szFileName, &nWidth, &nHeight, &nComponents, &eFormat);
+    if (pBits == NULL)
+        return false;
+
+    glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_S, wrapMode);
+    glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_T, wrapMode);
+
+    glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MIN_FILTER, minFilter);
+    glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MAG_FILTER, magFilter);
+
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    glTexImage2D(GL_TEXTURE_RECTANGLE, 0, nComponents, nWidth, nHeight, 0,
+        eFormat, GL_UNSIGNED_BYTE, pBits);
+
+    free(pBits);
+
+    return true;
+}
+
 void setupRC()
 {
     glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     cameraFrame.MoveForward(3);
 
     gltMakeTorus(torusBatch, 0.25f, 0.10f, 30, 30);
     gltMakeSphere(sphereBatch, 0.15f, 30, 15);
+    logoBatch.Begin(GL_QUADS, 4, 1);
+    static const float height = 155;
+    static const float width = 300;
+
+    logoBatch.MultiTexCoord2f(0, 0.0f, 0.0f);
+    logoBatch.Vertex3f(0.0f, 0.0f, 0.0f);
+    logoBatch.MultiTexCoord2f(0, width, 0.0f);
+    logoBatch.Vertex3f(width, 0.0f, 0.0f);
+    logoBatch.MultiTexCoord2f(0, width, height);
+    logoBatch.Vertex3f(width, height, 0.0f);
+    logoBatch.MultiTexCoord2f(0, 0.0f, height);
+    logoBatch.Vertex3f(0.0f, height, 0.0f);
+    logoBatch.End();
 
     shader[DIFFUSE_SHADER] = gltLoadShaderPairWithAttributes("diffuseLightShader.vp", "diffuseLightShader.fp",
         2, GLT_ATTRIBUTE_VERTEX, "vertexPos", GLT_ATTRIBUTE_NORMAL, "vertexNormal");
@@ -159,12 +203,26 @@ void setupRC()
 
     if (shader[DISSOLVE_SHADER] == NULL)
         printf("load dissolveShader error\n");
+
+    rectangleTexShader = gltLoadShaderPairWithAttributes("rectangle.vp", "rectangle.fp",
+        2, GLT_ATTRIBUTE_VERTEX, "vertexPos", GLT_ATTRIBUTE_TEXTURE0, "texCoords");
+
+    if (rectangleTexShader == NULL)
+        printf("load rectangleTextureShader error\n");
     
     selectShader(DIFFUSE_SHADER);
 
+    locRectTexImage = glGetUniformLocation(rectangleTexShader, "textureImage");
+    locRectMvpM = glGetUniformLocation(rectangleTexShader, "mvpM");
+    
     glGenTextures(1, &cloudTexture);
     glBindTexture(GL_TEXTURE_2D, cloudTexture);
     LoadTGATexture("Clouds.tga", GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE);
+
+    glGenTextures(1, &rectangleTexture);
+    glBindTexture(GL_TEXTURE_RECTANGLE, rectangleTexture);
+    LoadTGATextureRect("OpenGL-Logo.tga", GL_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE);	
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 void timerCB(int millisec)
@@ -236,6 +294,24 @@ void renderScene()
 
     modelViewM.PopMatrix();
 
+    M3DMatrix44f screenProjectionM, screenTranslationM, screenMvpM;
+    m3dMakeOrthographicMatrix(screenProjectionM, 0, 800, 0, 600, -1, 1);
+
+    static const float PI = 3.1415926;
+    float xPos = sin(fmod(elapsedTime, 3) / 3 * PI);
+    printf("%f\n", xPos);
+    m3dTranslationMatrix44(screenTranslationM, xPos, 0, 0);
+    m3dMatrixMultiply44(screenMvpM, screenTranslationM, screenProjectionM);
+    glEnable(GL_BLEND);
+    glDisable(GL_DEPTH_TEST);
+    glUseProgram(rectangleTexShader);
+    glUniformMatrix4fv(locRectMvpM, 1, FALSE, screenMvpM);
+    glUniform1i(locRectTexImage, 0);
+    glBindTexture(GL_TEXTURE_RECTANGLE, rectangleTexture);
+    logoBatch.Draw();
+    glEnable(GL_DEPTH_TEST);
+    glDisable(GL_BLEND);
+    
     glutSwapBuffers();
     glutTimerFunc(REDRAW_INTERVAL, timerCB, 0);
 }

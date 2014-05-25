@@ -1,0 +1,12 @@
+#version 330
+
+in vec4 vertexPos;
+in vec2 texCoords;
+uniform mat4 mvpM;
+
+out vec2 varyingTexCoords;
+void main()
+{
+    varyingTexCoords = texCoords;
+    gl_Position = mvpM * vertexPos;
+}
