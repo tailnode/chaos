@@ -40,6 +40,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 	@Override
 	public void onSurfaceCreated(GL10 arg0, EGLConfig arg1) {
         GLES20.glClearColor(1, 1, 1, 1);
+        GLES20.glEnable(GLES20.GL_CULL_FACE);
         mCuboid = new Cuboid(0.2f, 0.3f, 0.4f);
         Matrix.setLookAtM(mViewMatrix, 0, 0, 0, -3, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
 	}
