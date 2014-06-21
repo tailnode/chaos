@@ -22,10 +22,8 @@ public class MyGLSurfaceView extends GLSurfaceView {
 	}
 	
     public boolean onTouchEvent(MotionEvent e) {
-
         float x = e.getX();
         float y = e.getY();
-        Log.i("POSITION", "x = " + x + ", y = " + y);
 
         switch (e.getAction()) {
             case MotionEvent.ACTION_MOVE:

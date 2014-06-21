@@ -1,24 +1,23 @@
 attribute vec4 vertexPos;
 attribute vec3 vertexNormal;
+attribute vec4 vertexColor;
 
-uniform vec4 diffuseColor;
 uniform vec3 lightPos;
 uniform mat4 mvpMatrix;
 uniform mat4 mvMatrix;
-uniform mat3 normalMatrix;
 
 varying vec4 color;
 
 void main()
 {
     vec4 vertexPosEye = mvMatrix * vertexPos;
-    vec3 vertexNormalEye = normalMatrix * vertexNormal;
+    vec3 vertexNormalEye = vec3(mvMatrix * vec4(vertexNormal, 0.0));
 
     vec3 lightDirEye = normalize(lightPos - vertexPosEye.xyz/vertexPosEye.w);
     float intensity = max(0.0, dot(lightDirEye, vertexNormalEye));
 
-    color.rgb = intensity * diffuseColor.rgb;
-    color.a = diffuseColor.a;
+    color.rgb = intensity * vertexColor.rgb;
+    color.a = vertexColor.a;
 
     gl_Position = mvpMatrix * vertexPos;
 }

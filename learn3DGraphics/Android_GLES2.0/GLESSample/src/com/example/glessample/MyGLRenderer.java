@@ -19,18 +19,23 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 	public void onDrawFrame(GL10 arg0) {
 		GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 		
+		float[] rotateMatrixByX = new float[16];
+		float[] rotateMatrixByY = new float[16];
 		float[] rotateMatrix = new float[16];
-		Matrix.setRotateM(rotateMatrix, 0, angle, 0, 1, 0);
+		Matrix.setRotateM(rotateMatrix, 0, mAngle, 0, 1, 0);
+//		Matrix.setRotateM(rotateMatrixByX, 0, mAngle, 1, 0, 0);
+//		Matrix.setRotateM(rotateMatrixByY, 0, mAngle, 0f, (float)Math.cos(Math.toRadians(mAngle)), -(float)Math.sin(Math.toRadians(mAngle)));
+//		Matrix.multiplyMM(rotateMatrix, 0, rotateMatrixByX, 0, rotateMatrixByY, 0);
+		
+		mAngle++;
         
         mCuboid.draw(rotateMatrix, mViewMatrix, mProjectionMatrix);
-        angle++;
 	}
 
     @SuppressLint("NewApi")
     public void onSurfaceChanged(GL10 arg0, int arg1, int arg2) {
 	    w = arg1;
 	    h = arg2;
-	    Log.i("POSITION", "w = " + w + ", h = " + h);
 		GLES20.glViewport(0, 0, arg1, arg2);
 		
 		if (arg2 == 0) arg2 = 1;
@@ -42,7 +47,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES20.glClearColor(1, 1, 1, 1);
         GLES20.glEnable(GLES20.GL_CULL_FACE);
         mCuboid = new Cuboid(0.2f, 0.3f, 0.4f);
-        Matrix.setLookAtM(mViewMatrix, 0, 0, 0, -3, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
+        Matrix.setLookAtM(mViewMatrix, 0, 0, 0, 3, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
 	}
 	
 	private static String getFileContent(String filePath) {
@@ -65,34 +70,49 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         String fragmentShaderCode = getFileContent(fragmentShaderPath);
         int vertexShader = GLES20.glCreateShader(GLES20.GL_VERTEX_SHADER);
         int fragmentShader = GLES20.glCreateShader(GLES20.GL_FRAGMENT_SHADER);
-        checkGlError("glCreateShader");
+        
         GLES20.glShaderSource(vertexShader, vertexShaderCode);
         GLES20.glCompileShader(vertexShader);
-        checkGlError("glCompileShader: vertex shader");
+        checkCompile(vertexShader, "vertexShader");
+
         GLES20.glShaderSource(fragmentShader, fragmentShaderCode);
         GLES20.glCompileShader(fragmentShader);
-        checkGlError("glCompileShader: fragment shader");
+        checkCompile(fragmentShader, "fragmentShader");
         
         int program = GLES20.glCreateProgram();
-        checkGlError("glCreateProgram");
         GLES20.glAttachShader(program, vertexShader);
-        checkGlError("glAttachShader: vertex shader");
         GLES20.glAttachShader(program, fragmentShader);
-        checkGlError("glAttachShader: fragment shader");
         GLES20.glLinkProgram(program);
-        checkGlError("glLinkProgram");
+        checkLink(program, "glLinkProgram");
         
 	    return program;
 	}
 	
-    public static void checkGlError(String glOperation) {
-        int error;
-        while ((error = GLES20.glGetError()) != GLES20.GL_NO_ERROR) {
-            Log.e("GL_ERROR", glOperation + ": glError " + error);
-            throw new RuntimeException(glOperation + ": glError " + error);
+	private static void checkCompile(int shader, String info) {
+        int[] status = new int[1];
+        GLES20.glGetShaderiv(shader, GLES20.GL_COMPILE_STATUS, status, 0);
+        if (status[0] == 0) {
+            int[] length = new int[1];
+            GLES20.glGetShaderiv(shader, GLES20.GL_INFO_LOG_LENGTH, length, 0);
+            if (length[0] > 0) {
+            	Log.e(LOG_TAG, info + " " + GLES20.glGetShaderInfoLog(shader));
+                throw new RuntimeException("gl error: " + info);
+            }
         }
-    }
-
+	}
+	
+	private static void checkLink(int program, String info) {
+        int[] status = new int[1];
+        GLES20.glGetProgramiv(program, GLES20.GL_LINK_STATUS, status, 0);
+        if (status[0] == 0) {
+            int[] length = new int[1];
+            GLES20.glGetProgramiv(program, GLES20.GL_INFO_LOG_LENGTH, length, 0);
+            if (length[0] > 0) {
+            	Log.e(LOG_TAG, info + " " + GLES20.glGetProgramInfoLog(program));
+                throw new RuntimeException("gl error" + info);
+            }
+        }
+	}
 	public void move(float x, float y) {
 	    mCuboid.move(x, y);
 	}
@@ -102,7 +122,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     
     private Cuboid mCuboid;
     public static AssetManager assMnger;
-    private static short angle = 0;
+    private static short mAngle = 0; // degree, not radian
     public static int w;
     public static int h;
+    private final static String LOG_TAG = "GL_ERROR"; 
 }
