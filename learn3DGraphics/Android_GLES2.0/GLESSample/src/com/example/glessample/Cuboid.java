@@ -17,38 +17,38 @@ public class Cuboid {
 	
 	public Cuboid(float length, float width, float height) {
 
-		// vertex position normal color
+		// vertex position, normal, color, texture coordinate
 		float cuboidCoords[] = {
             // left face
-			-length/2, -height/2,  width/2, -1,  0,  0, 1, 0, 0, 1, //  0 left  front bottom
-			-length/2,  height/2,  width/2, -1,  0,  0, 1, 0, 0, 1, //  1 left  front top
-			-length/2, -height/2, -width/2, -1,  0,  0, 1, 0, 0, 1, //  2 left  back  bottom
-			-length/2,  height/2, -width/2, -1,  0,  0, 1, 0, 0, 1, //  3 left  back  top
+			-length/2, -height/2,  width/2, -1,  0,  0, 1, 0, 0, 1, 0, 0, //  0 left  front bottom
+			-length/2,  height/2,  width/2, -1,  0,  0, 1, 0, 0, 1, 0, 1, //  1 left  front top
+			-length/2, -height/2, -width/2, -1,  0,  0, 1, 0, 0, 1, 1, 0, //  2 left  back  bottom
+			-length/2,  height/2, -width/2, -1,  0,  0, 1, 0, 0, 1, 1, 1, //  3 left  back  top
             // right face                              
-			 length/2, -height/2,  width/2,  1,  0,  0, 0, 1, 0, 1, //  4 right front bottom
-			 length/2,  height/2,  width/2,  1,  0,  0, 0, 1, 0, 1, //  5 right front top
-			 length/2, -height/2, -width/2,  1,  0,  0, 0, 1, 0, 1, //  6 right back  bottom
-			 length/2,  height/2, -width/2,  1,  0,  0, 0, 1, 0, 1, //  7 right back  top
+			 length/2, -height/2,  width/2,  1,  0,  0, 0, 1, 0, 1, 0, 0, //  4 right front bottom
+			 length/2,  height/2,  width/2,  1,  0,  0, 0, 1, 0, 1, 0, 1, //  5 right front top
+			 length/2, -height/2, -width/2,  1,  0,  0, 0, 1, 0, 1, 1, 0, //  6 right back  bottom
+			 length/2,  height/2, -width/2,  1,  0,  0, 0, 1, 0, 1, 1, 1, //  7 right back  top
             // front face                              
-			-length/2, -height/2,  width/2,  0,  0,  1, 0, 0, 1, 1, //  8 left  front bottom
-			-length/2,  height/2,  width/2,  0,  0,  1, 0, 0, 1, 1, //  9 left  front top
-			 length/2, -height/2,  width/2,  0,  0,  1, 0, 0, 1, 1, // 10 right front bottom
-			 length/2,  height/2,  width/2,  0,  0,  1, 0, 0, 1, 1, // 11 right front top
+			-length/2, -height/2,  width/2,  0,  0,  1, 0, 0, 1, 1, 0, 0, //  8 left  front bottom
+			-length/2,  height/2,  width/2,  0,  0,  1, 0, 0, 1, 1, 0, 1, //  9 left  front top
+			 length/2, -height/2,  width/2,  0,  0,  1, 0, 0, 1, 1, 1, 0, // 10 right front bottom
+			 length/2,  height/2,  width/2,  0,  0,  1, 0, 0, 1, 1, 1, 1, // 11 right front top
 	        // back face                               
-			-length/2, -height/2, -width/2,  0,  0, -1, 1, 1, 0, 1, // 12 left  back  bottom
-			-length/2,  height/2, -width/2,  0,  0, -1, 1, 1, 0, 1, // 13 left  back  top
-			 length/2, -height/2, -width/2,  0,  0, -1, 1, 1, 0, 1, // 14 right back  bottom
-			 length/2,  height/2, -width/2,  0,  0, -1, 1, 1, 0, 1, // 15 right back  top
+			-length/2, -height/2, -width/2,  0,  0, -1, 1, 1, 0, 1, 0, 0, // 12 left  back  bottom
+			-length/2,  height/2, -width/2,  0,  0, -1, 1, 1, 0, 1, 0, 1, // 13 left  back  top
+			 length/2, -height/2, -width/2,  0,  0, -1, 1, 1, 0, 1, 1, 0, // 14 right back  bottom
+			 length/2,  height/2, -width/2,  0,  0, -1, 1, 1, 0, 1, 1, 1, // 15 right back  top
 	        // top face                                
-			-length/2,  height/2,  width/2,  0,  1,  0, 1, 0, 1, 1, // 16 left  front top
-			-length/2,  height/2, -width/2,  0,  1,  0, 1, 0, 1, 1, // 17 left  back  top
-			 length/2,  height/2,  width/2,  0,  1,  0, 1, 0, 1, 1, // 18 right front top
-			 length/2,  height/2, -width/2,  0,  1,  0, 1, 0, 1, 1, // 19 right back  top
+			-length/2,  height/2,  width/2,  0,  1,  0, 1, 0, 1, 1, 0, 0, // 16 left  front top
+			-length/2,  height/2, -width/2,  0,  1,  0, 1, 0, 1, 1, 0, 1, // 17 left  back  top
+			 length/2,  height/2,  width/2,  0,  1,  0, 1, 0, 1, 1, 1, 0, // 18 right front top
+			 length/2,  height/2, -width/2,  0,  1,  0, 1, 0, 1, 1, 1, 1, // 19 right back  top
 	        // bottom face                             
-			-length/2, -height/2,  width/2,  0, -1,  0, 0, 1, 1, 1, // 20 left  front bottom
-			-length/2, -height/2, -width/2,  0, -1,  0, 0, 1, 1, 1, // 21 left  back  bottom
-			 length/2, -height/2,  width/2,  0, -1,  0, 0, 1, 1, 1, // 22 right front bottom
-			 length/2, -height/2, -width/2,  0, -1,  0, 0, 1, 1, 1, // 23 right back  bottom
+			-length/2, -height/2,  width/2,  0, -1,  0, 0, 1, 1, 1, 0, 0, // 20 left  front bottom
+			-length/2, -height/2, -width/2,  0, -1,  0, 0, 1, 1, 1, 0, 1, // 21 left  back  bottom
+			 length/2, -height/2,  width/2,  0, -1,  0, 0, 1, 1, 1, 1, 0, // 22 right front bottom
+			 length/2, -height/2, -width/2,  0, -1,  0, 0, 1, 1, 1, 1, 1, // 23 right back  bottom
 		};
 		mVertexStride = cuboidCoords.length / 24 * 4;
 		
@@ -203,7 +203,7 @@ public class Cuboid {
 		GLES20.glDisableVertexAttribArray(mNormalHandle);
 		GLES20.glDisableVertexAttribArray(mColorHandle);
 	}
-    
+	
     void move(float x, float y) {
         if (x < 0) x = 0;
         if (y < 0) y = 0;

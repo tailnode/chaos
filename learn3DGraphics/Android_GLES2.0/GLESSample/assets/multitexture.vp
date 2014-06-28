@@ -1,0 +1,8 @@
+attribute vec4 vertexPosition;
+attribute vec2 textureCoord;
+varying vec2 varyingTexCoord;
+
+void main() {
+  gl_Position = vertexPosition;
+  varyingTexCoord = textureCoord;
+}
