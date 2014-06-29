@@ -84,10 +84,11 @@ public class Cuboid {
 		GLES20.glBufferData(GLES20.GL_ELEMENT_ARRAY_BUFFER, drawOrder.length * 2, orderbb, GLES20.GL_STATIC_DRAW);
 		
 		mPrograms = new int[SHADER_NUM];
-		mPrograms[SHADER_SIMPLE] = MyGLRenderer.genShaderProgram("vertex.vp", "fragment.fp");
+		mPrograms[SHADER_SIMPLE] = MyGLRenderer.genShaderProgram("simple.vp", "simple.fp");
 		mPrograms[SHADER_LIGHT] = MyGLRenderer.genShaderProgram("diffuseLightShader.vp", "diffuseLightShader.fp");
+		mPrograms[SHADER_FOG] = MyGLRenderer.genShaderProgram("fog.vp", "fog.fp");
 	    
-	    selectProgram(SHADER_LIGHT);
+	    selectProgram(SHADER_FOG);
 		
 		vertexbb.clear();
 		orderbb.clear();
@@ -109,7 +110,8 @@ public class Cuboid {
     private int mVertexStride;
     private static final int SHADER_SIMPLE = 0;
     private static final int SHADER_LIGHT = 1;
-    private static final int SHADER_NUM = 2;
+    private static final int SHADER_FOG = 2;
+    private static final int SHADER_NUM = 3;
     private int[] mPrograms;
     
     private void selectProgram(int program) {
@@ -125,13 +127,16 @@ public class Cuboid {
     	case SHADER_SIMPLE:
     		drawSimple(rotateMatrix, viewMatrix, projectionMatrix);
     		break;
+    	case SHADER_FOG:
+    		drawWithFog(rotateMatrix, viewMatrix, projectionMatrix);
+    		break;
     	}
     }
     
 	@SuppressLint("NewApi")
 	private void drawSimple(float[] rotateMatrix, float[] viewMatrix,
 			float[] projectionMatrix) {
-		int program = mPrograms[mProgramID];
+		int program = mPrograms[SHADER_SIMPLE];
 		mPositionHandle = GLES20.glGetAttribLocation(program, "vPosition");
 		mColorHandle = GLES20.glGetAttribLocation(program, "vVertexColor");
 
@@ -160,11 +165,55 @@ public class Cuboid {
 		GLES20.glDisableVertexAttribArray(mPositionHandle);
 		GLES20.glDisableVertexAttribArray(mColorHandle);
 	}
-     
+	
+	@SuppressLint("NewApi")
+	private void drawWithFog(float[] rotateMatrix, float[] viewMatrix,
+			float[] projectionMatrix) {
+		int program = mPrograms[SHADER_FOG];
+		int vertexPosHandle = GLES20.glGetAttribLocation(program, "vertexPosition");
+		int colorHandle = GLES20.glGetAttribLocation(program, "vertexColor");
+		int mvpMatrixHandle = GLES20.glGetUniformLocation(program, "mvpMatrix");
+		int mvMatrixHandle = GLES20.glGetUniformLocation(program, "mvMatrix");
+		int eyePositionHandle = GLES20.glGetUniformLocation(program, "eyePosition");
+		int maxDistHandle = GLES20.glGetUniformLocation(program, "maxDist");
+		int minDistHandle = GLES20.glGetUniformLocation(program, "minDist");
+		int fogColorHandle = GLES20.glGetUniformLocation(program, "fogColor");
+
+		GLES20.glEnableVertexAttribArray(vertexPosHandle);
+		GLES20.glEnableVertexAttribArray(colorHandle);
+
+		GLES20.glVertexAttribPointer(vertexPosHandle, 3, GLES20.GL_FLOAT,
+				false, mVertexStride, 0);
+
+		GLES20.glVertexAttribPointer(colorHandle, 4, GLES20.GL_FLOAT, false,
+				mVertexStride, 24);
+
+
+		float[] modleMatrix = new float[16];
+		float[] mvMatrix = new float[16];
+		float[] mvpMatrix = new float[16];
+		Matrix.multiplyMM(modleMatrix, 0, mTranslateMatrix, 0, rotateMatrix, 0);
+		Matrix.multiplyMM(mvMatrix, 0, viewMatrix, 0, modleMatrix, 0);
+		Matrix.multiplyMM(mvpMatrix, 0, projectionMatrix, 0, mvMatrix, 0);
+		
+		GLES20.glUniformMatrix4fv(mvpMatrixHandle, 1, false, mvpMatrix, 0);
+		GLES20.glUniformMatrix4fv(mvMatrixHandle, 1, false, mvMatrix, 0);
+		GLES20.glUniform4f(eyePositionHandle, 0f, 0f, 10.0f, 1.0f);
+		GLES20.glUniform1f(maxDistHandle, 30.0f);
+		GLES20.glUniform1f(minDistHandle, 5.0f);
+		GLES20.glUniform4f(fogColorHandle, 1.0f, 1.0f, 1.0f, 1.0f);
+
+		GLES20.glDrawElements(GLES20.GL_TRIANGLES, drawOrder.length,
+				GLES20.GL_UNSIGNED_SHORT, 0);
+
+		GLES20.glDisableVertexAttribArray(mPositionHandle);
+		GLES20.glDisableVertexAttribArray(mColorHandle);
+	}
+
 	@SuppressLint("NewApi")
 	private void drawWithLight(float[] rotateMatrix, float[] viewMatrix,
 			float[] projectionMatrix) {
-		int program = mPrograms[mProgramID];
+		int program = mPrograms[SHADER_LIGHT];
 		mPositionHandle = GLES20.glGetAttribLocation(program, "vertexPos");
 		mNormalHandle = GLES20.glGetAttribLocation(program, "vertexNormal");
 		mColorHandle = GLES20.glGetAttribLocation(program, "vertexColor");

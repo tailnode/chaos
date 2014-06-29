@@ -41,8 +41,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
 		mAngle++;
 
-//		mCuboid.draw(rotateMatrix, mViewMatrix, mProjectionMatrix);
-		mMultitexture.draw();
+		mCuboid.draw(rotateMatrix, mViewMatrix, mProjectionMatrix);
+//		mMultitexture.draw();
 	}
 
 	@SuppressLint("NewApi")
@@ -61,9 +61,9 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 	public void onSurfaceCreated(GL10 arg0, EGLConfig arg1) {
 		GLES20.glClearColor(1, 1, 1, 1);
 		GLES20.glEnable(GLES20.GL_CULL_FACE);
-//		mCuboid = new Cuboid(0.6f, 0.2f, 0.2f);
-		Matrix.setLookAtM(mViewMatrix, 0, 0, 0, 3, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
-		mMultitexture = new Multitexture();
+		mCuboid = new Cuboid(10f, 0.2f, 0.2f);
+		Matrix.setLookAtM(mViewMatrix, 0, 0, 0, 10, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
+//		mMultitexture = new Multitexture();
 	}
 
 	private static String getFileContent(String filePath) {
@@ -165,7 +165,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 	}
 
 	public void move(float x, float y) {
-//		mCuboid.move(x, y);
+		mCuboid.move(x, y);
 	}
 
 	private float[] mProjectionMatrix = new float[16];

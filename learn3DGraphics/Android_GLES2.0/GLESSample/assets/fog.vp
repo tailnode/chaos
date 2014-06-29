@@ -1,0 +1,25 @@
+uniform mat4 mvpMatrix;
+uniform mat4 mvMatrix;
+uniform vec4 eyePosition;
+
+attribute vec4 vertexPosition;
+attribute vec4 vertexColor;
+
+varying vec4 varyingBaseColor;
+varying float varyingVertexDist;
+
+float square(float x)
+{
+    return x * x;
+}
+
+void main() {
+    gl_Position = mvpMatrix * vertexPosition;
+    
+    vec4 vertexEyePos = mvMatrix * vertexPosition;
+    varyingVertexDist = sqrt(square(eyePosition.x - vertexEyePos.x) +
+                            square(eyePosition.y - vertexEyePos.y) +
+                            square(eyePosition.z - vertexEyePos.z));
+                            
+    varyingBaseColor = vertexColor;
+}
