@@ -25,4 +25,23 @@ if has("gui_running")
     set lines=55 columns=110 " 窗口界面的宽高
     set guifont=Consolas:h12:cANSI " 英文字体
     set guifontwide=Yahei_Mono:h10.5:cANSI " 中文字体
+    vmap <c-c> "+y
 endif
+
+" GLSL400/330 syntax
+command SetGLSLFileType call SetGLSLFileType()
+function SetGLSLFileType()
+  for item in getline(1,10)
+    if item =~ "#version 400"
+      execute ':set filetype=glsl400'
+      break
+    endif
+    if item =~ "#version 330"
+      execute ':set filetype=glsl330'
+      break
+    endif
+  endfor
+endfunction
+au BufNewFile,BufRead *.frag,*.vert,*.fp,*.vp,*.glsl SetGLSLFileType
+
+inoremap jk <c-[> " 在insert模式下映射jk为Ctrl+[，也即进入normal模式
