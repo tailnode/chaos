@@ -1,7 +1,7 @@
-"ÒÔÏÂÎª½â¾öÖĞÎÄÏÔÊ¾ÎÊÌâ,ÒÔ¼°ÏàÓ¦´øÀ´µÄÌáÊ¾¼°²Ëµ¥ÂÒÂëÎÊÌâ  
-set encoding=utf-8 " ÉèÖÃvimÄÚ²¿Ê¹ÓÃµÄ×Ö·û±àÂë
-lang messages zh_CN.UTF-8 " ½â¾öconsleÊä³öÂÒÂë   
-"½â¾ö²Ëµ¥ÂÒÂë   
+"ä»¥ä¸‹ä¸ºè§£å†³ä¸­æ–‡æ˜¾ç¤ºé—®é¢˜,ä»¥åŠç›¸åº”å¸¦æ¥çš„æç¤ºåŠèœå•ä¹±ç é—®é¢˜  
+set encoding=utf-8 " è®¾ç½®vimå†…éƒ¨ä½¿ç”¨çš„å­—ç¬¦ç¼–ç 
+lang messages zh_CN.UTF-8 " è§£å†³consleè¾“å‡ºä¹±ç    
+"è§£å†³èœå•ä¹±ç    
 source $VIMRUNTIME/delmenu.vim   
 source $VIMRUNTIME/menu.vim  
 
@@ -15,16 +15,16 @@ set autoindent
 set cindent
 set hls
 set incsearch
-" ×Ô¶¯¼ì²âÎÄ¼şÀàĞÍ²¢¼ÓÔØÏàÓ¦µÄÉèÖÃ
+" è‡ªåŠ¨æ£€æµ‹æ–‡ä»¶ç±»å‹å¹¶åŠ è½½ç›¸åº”çš„è®¾ç½®
 filetype plugin indent on
 autocmd FileType python setlocal et sta sw=4 sts=4
 
-" µ±´ò¿ªGUI´°¿ÚVIMÊ±ÔËĞĞ
+" å½“æ‰“å¼€GUIçª—å£VIMæ—¶è¿è¡Œ
 if has("gui_running")
-    winpos 5 25 " ´°¿ÚÎ»ÖÃ
-    set lines=55 columns=110 " ´°¿Ú½çÃæµÄ¿í¸ß
-    set guifont=Consolas:h12:cANSI " Ó¢ÎÄ×ÖÌå
-    set guifontwide=Yahei_Mono:h10.5:cANSI " ÖĞÎÄ×ÖÌå
+    winpos 5 25 " çª—å£ä½ç½®
+    set lines=55 columns=110 " çª—å£ç•Œé¢çš„å®½é«˜
+    set guifont=Consolas:h12:cANSI " è‹±æ–‡å­—ä½“
+    set guifontwide=Yahei_Mono:h10.5:cANSI " ä¸­æ–‡å­—ä½“
     vmap <c-c> "+y
 endif
 
@@ -44,4 +44,9 @@ function SetGLSLFileType()
 endfunction
 au BufNewFile,BufRead *.frag,*.vert,*.fp,*.vp,*.glsl SetGLSLFileType
 
-inoremap jk <c-[> " ÔÚinsertÄ£Ê½ÏÂÓ³ÉäjkÎªCtrl+[£¬Ò²¼´½øÈënormalÄ£Ê½
+inoremap jk <c-[> " åœ¨insertæ¨¡å¼ä¸‹æ˜ å°„jkä¸ºCtrl+[ï¼Œä¹Ÿå³è¿›å…¥normalæ¨¡å¼
+
+colorscheme molokai
+
+set wildmenu
+set wildignore=*.bak,*.o,*.e,*~
