@@ -12,8 +12,8 @@ Plugin 'VundleVim/Vundle.vim'
 
 Plugin 'fatih/vim-go'
 Plugin 'ervandew/supertab'
-Plugin 'Valloric/YouCompleteMe'
 Plugin 'moll/vim-node'
+Plugin 'buoto/gotests-vim'
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
